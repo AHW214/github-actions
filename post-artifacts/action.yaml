@@ -22,6 +22,7 @@ inputs:
       comment with artifacts.
   debug:
     required: false
+    default: false
     description: >
       [Bool] Whether to log GitHub API calls in the action output.
 runs:
