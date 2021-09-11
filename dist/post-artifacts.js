@@ -18,15 +18,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
@@ -43,9 +34,9 @@ const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
         return `${acc}\n* [${name}](${link})`;
     }, header);
 };
-const findOutdatedComments = (context, github, issueNumber) => __awaiter(void 0, void 0, void 0, function* () {
+const findOutdatedComments = async (context, github, issueNumber) => {
     const { repo: { owner, repo }, } = context;
-    const { data: comments } = yield github.rest.issues.listComments({
+    const { data: comments } = await github.rest.issues.listComments({
         repo,
         owner,
         issue_number: issueNumber,
@@ -61,14 +52,14 @@ const findOutdatedComments = (context, github, issueNumber) => __awaiter(void 0,
         const artifactIds = matches.map((m) => Number(m[1])).filter(isNaN);
         return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
     }, comments);
-});
-const handleOutdatedArtifacts = (context, github, newComment, outdatedComments, outdatedCommentTemplate) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const handleOutdatedArtifacts = async (context, github, newComment, outdatedComments, outdatedCommentTemplate) => {
     const { repo: { owner, repo }, } = context;
     for (const { commentId, artifactIds } of outdatedComments) {
         for (const artifactId of artifactIds) {
             core.info(`Deleting outdated artifact ${artifactId}`);
             try {
-                yield github.rest.actions.deleteArtifact({
+                await github.rest.actions.deleteArtifact({
                     owner,
                     repo,
                     artifact_id: artifactId,
@@ -85,26 +76,26 @@ const handleOutdatedArtifacts = (context, github, newComment, outdatedComments, 
             Nothing: () => '**These artifacts are outdated and have been deleted. ' +
                 `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
         });
-        yield github.rest.issues.updateComment({
+        await github.rest.issues.updateComment({
             repo,
             owner,
             comment_id: commentId,
             body,
         });
     }
-});
-const postNewComment = (context, github, issueNumber, body) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const postNewComment = async (context, github, issueNumber, body) => {
     const { repo: { owner, repo }, } = context;
     core.info('Posting new comment');
-    const { data } = yield github.rest.issues.createComment({
+    const { data } = await github.rest.issues.createComment({
         repo,
         owner,
         issue_number: issueNumber,
         body,
     });
     return data;
-});
-const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const run = async (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => {
     var _a, _b;
     const { payload: { workflow_run: workflowRun }, repo: { owner, repo }, } = context;
     const runId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.id;
@@ -120,7 +111,7 @@ const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutd
         return core.error('No issue number found');
     }
     core.info(`Posting to pull request #${issueNumber}`);
-    const { data: { artifacts }, } = yield github.rest.actions.listWorkflowRunArtifacts({
+    const { data: { artifacts }, } = await github.rest.actions.listWorkflowRunArtifacts({
         owner,
         repo,
         run_id: runId,
@@ -130,13 +121,13 @@ const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutd
     }
     const body = makeCommentBody(context, checkSuiteId, artifacts, commentHeader);
     if (!removeOutdatedArtifacts) {
-        yield postNewComment(context, github, issueNumber, body);
+        await postNewComment(context, github, issueNumber, body);
         return core.info('Leaving outdated artifacts, exiting...');
     }
-    const outdatedComments = yield findOutdatedComments(context, github, issueNumber);
-    const newComment = yield postNewComment(context, github, issueNumber, body);
-    yield handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
-});
+    const outdatedComments = await findOutdatedComments(context, github, issueNumber);
+    const newComment = await postNewComment(context, github, issueNumber, body);
+    await handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
+};
 run_1.attempt(() => {
     const commentHeader = github_client_1.getInputMaybe('comment-header');
     const outdatedCommentTemplate = github_client_1.getInputMaybe('outdated-comment-template');
