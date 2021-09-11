@@ -103,6 +103,7 @@ const postNewComment = (context, github, body) => __awaiter(void 0, void 0, void
 });
 const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => __awaiter(void 0, void 0, void 0, function* () {
     const { issue: { number: issueNumber }, repo: { owner, repo }, runId, } = context;
+    core.info(JSON.stringify(context.payload));
     core.info(`Posting to pull request #${issueNumber}`);
     const { data: { check_suite_id: checkSuiteId }, } = yield github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
     if (checkSuiteId === undefined) {
