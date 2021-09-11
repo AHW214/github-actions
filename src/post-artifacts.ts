@@ -192,6 +192,8 @@ const run = async (
     issueNumber,
   );
 
+  core.info(`${outdatedComments.length}`);
+
   const newComment = await postNewComment(context, github, issueNumber, body);
 
   await handleOutdatedArtifacts(
