@@ -103,9 +103,13 @@ const postNewComment = (context, github, body) => __awaiter(void 0, void 0, void
 });
 const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const { payload: { workflow_run: workflowRun }, repo: { owner, repo }, runId, } = context;
+    const { payload: { workflow_run: workflowRun }, repo: { owner, repo }, } = context;
+    const runId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.id;
     const checkSuiteId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.check_suite_id;
     const issueNumber = (_b = (_a = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.pull_requests) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.number;
+    if (runId === undefined) {
+        return core.error('No workflow run found');
+    }
     if (checkSuiteId === undefined) {
         return core.error('No check suite found');
     }

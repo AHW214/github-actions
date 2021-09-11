@@ -142,12 +142,16 @@ const run = async (
   const {
     payload: { workflow_run: workflowRun },
     repo: { owner, repo },
-    runId,
   } = context;
 
+  const runId: number | undefined = workflowRun?.id;
   const checkSuiteId: number | undefined = workflowRun?.check_suite_id;
   const issueNumber: number | undefined =
     workflowRun?.pull_requests?.[0]?.number;
+
+  if (runId === undefined) {
+    return core.error('No workflow run found');
+  }
 
   if (checkSuiteId === undefined) {
     return core.error('No check suite found');
