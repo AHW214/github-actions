@@ -49,7 +49,7 @@ const findOutdatedComments = async (context, github, issueNumber) => {
         core.info('1');
         const matches = [...comment.body.matchAll(regexArtifact)];
         core.info(`${matches}`);
-        const artifactIds = matches.map((m) => Number(m[1])).filter(isNaN);
+        const artifactIds = matches.map((m) => Number(m[1]));
         core.info(`${artifactIds}`);
         return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
     }, comments);
