@@ -56,6 +56,8 @@ const findOutdatedComments = async (
   );
 
   return mapFalsy((comment) => {
+    core.info(JSON.stringify(comment));
+
     if (!authorIsBot(comment) || !comment.body) return undefined;
     core.info('1');
 
