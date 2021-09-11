@@ -145,6 +145,8 @@ const run = async (
     runId,
   } = context;
 
+  core.info(JSON.stringify(context.payload));
+
   core.info(`Posting to pull request #${issueNumber}`);
 
   const {
