@@ -38,16 +38,16 @@ const makeCommentBody = (
 const findOutdatedComments = async (
   context: Context,
   github: GithubClient,
+  issueNumber: number,
 ): Promise<Array<CommentInfo>> => {
   const {
-    issue,
     repo: { owner, repo },
   } = context;
 
   const { data: comments } = await github.rest.issues.listComments({
     repo,
     owner,
-    issue_number: issue.number,
+    issue_number: issueNumber,
   });
 
   const regexArtifact = new RegExp(
@@ -113,10 +113,10 @@ const handleOutdatedArtifacts = async (
 const postNewComment = async (
   context: Context,
   github: GithubClient,
+  issueNumber: number,
   body: string,
 ): Promise<IssueComment> => {
   const {
-    issue,
     repo: { owner, repo },
   } = context;
 
@@ -125,7 +125,7 @@ const postNewComment = async (
   const { data } = await github.rest.issues.createComment({
     repo,
     owner,
-    issue_number: issue.number,
+    issue_number: issueNumber,
     body,
   });
 
@@ -178,12 +178,17 @@ const run = async (
   const body = makeCommentBody(context, checkSuiteId, artifacts, commentHeader);
 
   if (!removeOutdatedArtifacts) {
-    await postNewComment(context, github, body);
+    await postNewComment(context, github, issueNumber, body);
     return core.info('Leaving outdated artifacts, exiting...');
   }
 
-  const outdatedComments = await findOutdatedComments(context, github);
-  const newComment = await postNewComment(context, github, body);
+  const outdatedComments = await findOutdatedComments(
+    context,
+    github,
+    issueNumber,
+  );
+
+  const newComment = await postNewComment(context, github, issueNumber, body);
 
   await handleOutdatedArtifacts(
     context,
