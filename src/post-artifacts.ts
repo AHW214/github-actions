@@ -56,15 +56,12 @@ const findOutdatedComments = async (
   );
 
   return mapFalsy((comment) => {
-    core.info(JSON.stringify(comment));
-
     if (!authorIsBot(comment) || !comment.body) return undefined;
-    core.info('1');
 
     const matches = [...comment.body.matchAll(regexArtifact)];
-    core.info(`${matches}`);
-    const artifactIds = matches.map((m) => Number(m[1]));
-    core.info(`${artifactIds}`);
+    const artifactIds = matches
+      .map((m) => Number(m[1]))
+      .filter((id) => !isNaN(id));
 
     return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
   }, comments);
@@ -192,8 +189,6 @@ const run = async (
     github,
     issueNumber,
   );
-
-  core.info(`${outdatedComments.length}`);
 
   const newComment = await postNewComment(context, github, issueNumber, body);
 

@@ -43,14 +43,12 @@ const findOutdatedComments = async (context, github, issueNumber) => {
     });
     const regexArtifact = new RegExp(`${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`, 'g');
     return maybe_1.mapFalsy((comment) => {
-        core.info(JSON.stringify(comment));
         if (!comment_1.authorIsBot(comment) || !comment.body)
             return undefined;
-        core.info('1');
         const matches = [...comment.body.matchAll(regexArtifact)];
-        core.info(`${matches}`);
-        const artifactIds = matches.map((m) => Number(m[1]));
-        core.info(`${artifactIds}`);
+        const artifactIds = matches
+            .map((m) => Number(m[1]))
+            .filter((id) => !isNaN(id));
         return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
     }, comments);
 };
@@ -126,7 +124,6 @@ const run = async (context, github, commentHeader, outdatedCommentTemplate, remo
         return core.info('Leaving outdated artifacts, exiting...');
     }
     const outdatedComments = await findOutdatedComments(context, github, issueNumber);
-    core.info(`${outdatedComments.length}`);
     const newComment = await postNewComment(context, github, issueNumber, body);
     await handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
 };
