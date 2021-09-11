@@ -140,22 +140,24 @@ const run = async (
   removeOutdatedArtifacts: boolean,
 ): Promise<void> => {
   const {
-    issue: { number: issueNumber },
+    payload: { workflow_run: workflowRun },
     repo: { owner, repo },
     runId,
   } = context;
 
-  core.info(JSON.stringify(context.payload));
-
-  core.info(`Posting to pull request #${issueNumber}`);
-
-  const {
-    data: { check_suite_id: checkSuiteId },
-  } = await github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+  const checkSuiteId: number | undefined = workflowRun?.check_suite_id;
+  const issueNumber: number | undefined =
+    workflowRun?.pull_requests?.[0]?.number;
 
   if (checkSuiteId === undefined) {
     return core.error('No check suite found');
   }
+
+  if (issueNumber === undefined) {
+    return core.error('No issue number found');
+  }
+
+  core.info(`Posting to pull request #${issueNumber}`);
 
   const {
     data: { artifacts },
