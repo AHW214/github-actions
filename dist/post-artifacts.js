@@ -43,12 +43,12 @@ const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
         return `${acc}\n* [${name}](${link})`;
     }, header);
 };
-const findOutdatedComments = (context, github) => __awaiter(void 0, void 0, void 0, function* () {
-    const { issue, repo: { owner, repo }, } = context;
+const findOutdatedComments = (context, github, issueNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    const { repo: { owner, repo }, } = context;
     const { data: comments } = yield github.rest.issues.listComments({
         repo,
         owner,
-        issue_number: issue.number,
+        issue_number: issueNumber,
     });
     const regexArtifact = new RegExp(`${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`, 'g');
     return maybe_1.mapFalsy((comment) => {
@@ -90,13 +90,13 @@ const handleOutdatedArtifacts = (context, github, newComment, outdatedComments, 
         });
     }
 });
-const postNewComment = (context, github, body) => __awaiter(void 0, void 0, void 0, function* () {
-    const { issue, repo: { owner, repo }, } = context;
+const postNewComment = (context, github, issueNumber, body) => __awaiter(void 0, void 0, void 0, function* () {
+    const { repo: { owner, repo }, } = context;
     core.info('Posting new comment');
     const { data } = yield github.rest.issues.createComment({
         repo,
         owner,
-        issue_number: issue.number,
+        issue_number: issueNumber,
         body,
     });
     return data;
@@ -127,11 +127,11 @@ const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutd
     }
     const body = makeCommentBody(context, checkSuiteId, artifacts, commentHeader);
     if (!removeOutdatedArtifacts) {
-        yield postNewComment(context, github, body);
+        yield postNewComment(context, github, issueNumber, body);
         return core.info('Leaving outdated artifacts, exiting...');
     }
-    const outdatedComments = yield findOutdatedComments(context, github);
-    const newComment = yield postNewComment(context, github, body);
+    const outdatedComments = yield findOutdatedComments(context, github, issueNumber);
+    const newComment = yield postNewComment(context, github, issueNumber, body);
     yield handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
 });
 run_1.attempt(() => {
