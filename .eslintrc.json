@@ -1,5 +1,5 @@
 {
-    "plugins": ["jest", "@typescript-eslint"],
+    "plugins": ["@typescript-eslint"],
     "extends": ["plugin:github/recommended"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -9,12 +9,11 @@
     },
     "rules": {
       "eslint-comments/no-use": "off",
+      "import/first": "off",
       "import/no-namespace": "off",
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "error",
       "@typescript-eslint/explicit-member-accessibility": ["error", {"accessibility": "no-public"}],
       "@typescript-eslint/no-require-imports": "error",
-      "@typescript-eslint/array-type": "error",
       "@typescript-eslint/await-thenable": "error",
       "@typescript-eslint/ban-ts-comment": "error",
       "camelcase": "off",
@@ -41,14 +40,11 @@
       "@typescript-eslint/promise-function-async": "error",
       "@typescript-eslint/require-array-sort-compare": "error",
       "@typescript-eslint/restrict-plus-operands": "error",
-      "semi": "off",
-      "@typescript-eslint/semi": ["error", "never"],
       "@typescript-eslint/type-annotation-spacing": "error",
       "@typescript-eslint/unbound-method": "error"
     },
     "env": {
       "node": true,
-      "es6": true,
-      "jest/globals": true
+      "es2020": true
     }
   }

@@ -1,0 +1,29 @@
+name: Post Artifacts
+description: Post artifacts to the PR from which they were generated.
+author: AHW214
+inputs:
+  github-token:
+    required: true
+    description: >
+      [String] Token for communicating with the GitHub API.
+  remove-outdated-artifacts:
+    required: true
+    description: >
+      [Bool] Whether to remove previously posted artifacts.
+  comment-header:
+    required: false
+    description: >
+      [String] The header for comments containing new artifacts.
+  outdated-comment-template:
+    required: false
+    description: >
+      [String] Template to use when updating outdated comments. The variable
+      ":new-comment" will be interpolated as the URL to the most recently posted
+      comment with artifacts.
+  debug:
+    required: false
+    description: >
+      [Bool] Whether to log GitHub API calls in the action output.
+runs:
+  using: 'node16'
+  main: 'dist/post-artifacts.js'
