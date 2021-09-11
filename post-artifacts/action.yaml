@@ -26,4 +26,4 @@ inputs:
       [Bool] Whether to log GitHub API calls in the action output.
 runs:
   using: 'node16'
-  main: 'dist/post-artifacts.js'
+  main: '../dist/post-artifacts.js'
