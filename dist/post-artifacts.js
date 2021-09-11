@@ -102,13 +102,17 @@ const postNewComment = (context, github, body) => __awaiter(void 0, void 0, void
     return data;
 });
 const run = (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => __awaiter(void 0, void 0, void 0, function* () {
-    const { issue: { number: issueNumber }, repo: { owner, repo }, runId, } = context;
-    core.info(JSON.stringify(context.payload));
-    core.info(`Posting to pull request #${issueNumber}`);
-    const { data: { check_suite_id: checkSuiteId }, } = yield github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+    var _a, _b;
+    const { payload: { workflow_run: workflowRun }, repo: { owner, repo }, runId, } = context;
+    const checkSuiteId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.check_suite_id;
+    const issueNumber = (_b = (_a = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.pull_requests) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.number;
     if (checkSuiteId === undefined) {
         return core.error('No check suite found');
     }
+    if (issueNumber === undefined) {
+        return core.error('No issue number found');
+    }
+    core.info(`Posting to pull request #${issueNumber}`);
     const { data: { artifacts }, } = yield github.rest.actions.listWorkflowRunArtifacts({
         owner,
         repo,
