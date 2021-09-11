@@ -57,8 +57,10 @@ const findOutdatedComments = async (
 
   return mapFalsy((comment) => {
     if (!authorIsBot(comment) || !comment.body) return undefined;
+    core.info('1');
 
     const matches = [...comment.body.matchAll(regexArtifact)];
+    core.info(`${matches}`);
     const artifactIds = matches.map((m) => Number(m[1])).filter(isNaN);
 
     return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
