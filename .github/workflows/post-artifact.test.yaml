@@ -1,0 +1,16 @@
+name: 'Test: Post Artifacts Action'
+
+on:
+  workflow_run:
+    workflows: ['Generate Artifacts']
+    types: [completed]
+
+jobs:
+  test-post-artifacts:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./post-artifacts
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          remove-outdated-artifacts: true
