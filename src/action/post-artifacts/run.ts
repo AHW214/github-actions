@@ -105,6 +105,8 @@ const handleOutdatedArtifacts = async (
 
     core.info(`Updating outdated comment ${commentId}`);
 
+    const tag = `<!-- ${COMMENT_TAG} -->`;
+
     const body = outdatedCommentTemplate.caseOf({
       Just: (template) => template.replace(':new-comment', newComment.html_url),
       Nothing: () =>
@@ -112,11 +114,13 @@ const handleOutdatedArtifacts = async (
         `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
     });
 
+    const taggedBody = `${tag}${body}`;
+
     await github.rest.issues.updateComment({
       repo,
       owner,
       comment_id: commentId,
-      body,
+      body: taggedBody,
     });
   }
 };
