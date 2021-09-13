@@ -1,15 +1,15 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
-import type { Context } from '@actions/github/lib/context';
 import { Maybe } from 'purify-ts';
 
-import { attempt, withGithubClient } from './control/run';
-import type { WorkflowRunArtifact } from './data/artifact';
-import type { IssueComment } from './data/comment';
-import { authorIsBot } from './data/comment';
-import type { GithubClient } from './data/github-client';
-import { getInputMaybe } from './data/github-client';
-import { mapFalsy } from './data/maybe';
+import { Context } from 'action/post-artifacts/codec';
+import { attempt, withGithubClient } from 'control/run';
+import type { WorkflowRunArtifact } from 'data/artifact';
+import type { IssueComment } from 'data/comment';
+import { authorIsBot } from 'data/comment';
+import type { GithubClient } from 'data/github-client';
+import { getInputMaybe } from 'data/github-client';
+import { mapFalsy } from 'data/maybe';
 
 type CommentInfo = {
   artifactIds: Array<number>;
@@ -142,26 +142,15 @@ const run = async (
   removeOutdatedArtifacts: boolean,
 ): Promise<void> => {
   const {
-    payload: { workflow_run: workflowRun },
     repo: { owner, repo },
+    payload: {
+      workflow_run: {
+        id: runId,
+        check_suite_id: checkSuiteId,
+        pull_requests: [{ number: issueNumber }],
+      },
+    },
   } = context;
-
-  const runId: number | undefined = workflowRun?.id;
-  const checkSuiteId: number | undefined = workflowRun?.check_suite_id;
-  const issueNumber: number | undefined =
-    workflowRun?.pull_requests?.[0]?.number;
-
-  if (runId === undefined) {
-    return core.error('No workflow run found');
-  }
-
-  if (checkSuiteId === undefined) {
-    return core.error('No check suite found');
-  }
-
-  if (issueNumber === undefined) {
-    return core.error('No issue number found');
-  }
 
   core.info(`Posting to pull request #${issueNumber}`);
 
@@ -208,13 +197,17 @@ attempt(() => {
     'remove-outdated-artifacts',
   );
 
-  return withGithubClient((github) =>
-    run(
-      globalContext,
-      github,
-      commentHeader,
-      outdatedCommentTemplate,
-      removeOutdatedArtifacts,
-    ),
-  );
+  return Context.decode(globalContext).caseOf({
+    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
+    Right: (context) =>
+      withGithubClient((github) =>
+        run(
+          context,
+          github,
+          commentHeader,
+          outdatedCommentTemplate,
+          removeOutdatedArtifacts,
+        ),
+      ),
+  });
 });

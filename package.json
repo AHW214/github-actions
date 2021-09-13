@@ -4,7 +4,7 @@
   "private": true,
   "description": "Helpful GitHub actions",
   "scripts": {
-    "build": "tsc",
+    "build": "ttsc",
     "format": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
@@ -28,6 +28,8 @@
     "eslint-plugin-github": "^4.1.1",
     "js-yaml": "^4.1.0",
     "prettier": "2.2.1",
+    "ts-transformer-imports": "^0.4.3",
+    "ttypescript": "^1.5.12",
     "typescript": "^4.1.3"
   }
 }

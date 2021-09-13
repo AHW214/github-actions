@@ -22,6 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.withGithubClient = exports.attempt = void 0;
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
+const github_client_1 = require("../data/github-client");
 const attempt = async (run) => {
     try {
         return await run();

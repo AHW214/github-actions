@@ -1,7 +1,7 @@
 export { IssueComment, authorIsBot };
 
-import type { GithubClient } from './github-client';
-import type { Awaited } from '../util/type';
+import type { GithubClient } from 'data/github-client';
+import type { Awaited } from 'util/type';
 
 type IssueComment = Awaited<
   ReturnType<GithubClient['rest']['issues']['listComments']>

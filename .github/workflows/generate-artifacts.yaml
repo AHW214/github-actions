@@ -1,0 +1,32 @@
+name: Generate Artifacts
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  generate-artifact-1:
+    name: Generate Artifact 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Artifact
+        run: |
+          echo "im artifact 1" > artifact_1.txt
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifact 1
+          path: artifact_1.txt
+
+  generate-artifact-2:
+    name: Generate Artifact 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Artifact
+        run: |
+          echo "im artifact 2" > artifact_2.txt
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifact 2
+          path: artifact_2.txt
