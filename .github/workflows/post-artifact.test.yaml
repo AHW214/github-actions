@@ -10,6 +10,7 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: ./post-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
