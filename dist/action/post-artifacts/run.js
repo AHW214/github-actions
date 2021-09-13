@@ -126,7 +126,7 @@ run_1.attempt(() => {
     const commentHeader = github_client_2.getInputMaybe('comment-header');
     const outdatedCommentTemplate = github_client_2.getInputMaybe('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return codec_1.Context.decode(github_1.context).caseOf({
+    return codec_1.decode(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
         Right: (context) => run_1.withGithubClient((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
     });

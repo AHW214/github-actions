@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import { Maybe } from 'purify-ts';
 
-import { Context } from 'action/post-artifacts/codec';
+import { Context, decode } from 'action/post-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
 import type { IssueComment } from 'data/comment';
@@ -206,7 +206,7 @@ attempt(() => {
     'remove-outdated-artifacts',
   );
 
-  return Context.decode(globalContext).caseOf({
+  return decode(globalContext).caseOf({
     Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
     Right: (context) =>
       withGithubClient((github) =>

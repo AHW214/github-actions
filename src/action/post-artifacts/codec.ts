@@ -1,9 +1,18 @@
-export { Context };
+export { Context, decode };
 
-import type { GetType } from 'purify-ts';
-import { Codec, nonEmptyList, number, string } from 'purify-ts';
+import type { Context as GithubContext } from '@actions/github/lib/context';
+import type { Either, GetType } from 'purify-ts';
+import { Codec, nonEmptyList, number } from 'purify-ts';
 
-type Context = GetType<typeof Context>;
+type Payload = GetType<typeof Payload>;
+
+type Context = {
+  repo: {
+    owner: string;
+    repo: string;
+  };
+  payload: Payload;
+};
 
 const PullRequest = Codec.interface({
   number: number,
@@ -19,12 +28,7 @@ const Payload = Codec.interface({
   workflow_run: WorkflowRun,
 });
 
-const Repository = Codec.interface({
-  owner: string,
-  repo: string,
-});
-
-const Context = Codec.interface({
-  repo: Repository,
-  payload: Payload,
-});
+const decode = (context: GithubContext): Either<string, Context> => {
+  const { repo, payload } = context;
+  return Payload.decode(payload).map((payload) => ({ repo, payload }));
+};

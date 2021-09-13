@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Context = void 0;
+exports.decode = void 0;
 const purify_ts_1 = require("purify-ts");
 const PullRequest = purify_ts_1.Codec.interface({
     number: purify_ts_1.number,
@@ -13,13 +13,9 @@ const WorkflowRun = purify_ts_1.Codec.interface({
 const Payload = purify_ts_1.Codec.interface({
     workflow_run: WorkflowRun,
 });
-const Repository = purify_ts_1.Codec.interface({
-    owner: purify_ts_1.string,
-    repo: purify_ts_1.string,
-});
-const Context = purify_ts_1.Codec.interface({
-    repo: Repository,
-    payload: Payload,
-});
-exports.Context = Context;
+const decode = (context) => {
+    const { repo, payload } = context;
+    return Payload.decode(payload).map((payload) => ({ repo, payload }));
+};
+exports.decode = decode;
 //# sourceMappingURL=codec.js.map
