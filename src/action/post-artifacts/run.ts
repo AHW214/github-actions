@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
-import { Maybe } from 'purify-ts';
+import { Just, Maybe, Nothing } from 'purify-ts';
 
 import { Context, decode } from 'action/post-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
@@ -9,7 +9,6 @@ import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
 import type { GithubClient } from 'data/github-client';
 import { getInputMaybe } from 'data/github-client';
-import { mapMaybe } from 'data/maybe';
 
 type CommentInfo = {
   artifactIds: Array<number>;
@@ -63,16 +62,16 @@ const findOutdatedComments = async (
     'g',
   );
 
-  return mapMaybe((comment) => {
+  return Maybe.mapMaybe((comment) => {
     if (!authorIsBot(comment) || !comment.body || !regexTag.test(comment.body))
-      return undefined;
+      return Nothing;
 
     const matches = [...comment.body.matchAll(regexArtifact)];
     const artifactIds = matches
       .map((m) => Number(m[1]))
       .filter((id) => !isNaN(id));
 
-    return { commentId: comment.id, artifactIds };
+    return Just({ commentId: comment.id, artifactIds });
   }, comments);
 };
 

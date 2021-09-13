@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
+const purify_ts_1 = require("purify-ts");
 const codec_1 = require("./codec");
 const run_1 = require("../../control/run");
 const artifact_1 = require("../../data/artifact");
@@ -28,7 +29,6 @@ const comment_1 = require("../../data/comment");
 const comment_2 = require("../../data/comment");
 const github_client_1 = require("../../data/github-client");
 const github_client_2 = require("../../data/github-client");
-const maybe_1 = require("../../data/maybe");
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
     const { repo: { owner, repo }, } = context;
@@ -50,14 +50,14 @@ const findOutdatedComments = async (context, github, issueNumber) => {
     });
     const regexTag = new RegExp(COMMENT_TAG);
     const regexArtifact = new RegExp(`${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`, 'g');
-    return maybe_1.mapMaybe((comment) => {
+    return purify_ts_1.Maybe.mapMaybe((comment) => {
         if (!comment_2.authorIsBot(comment) || !comment.body || !regexTag.test(comment.body))
-            return undefined;
+            return purify_ts_1.Nothing;
         const matches = [...comment.body.matchAll(regexArtifact)];
         const artifactIds = matches
             .map((m) => Number(m[1]))
             .filter((id) => !isNaN(id));
-        return { commentId: comment.id, artifactIds };
+        return purify_ts_1.Just({ commentId: comment.id, artifactIds });
     }, comments);
 };
 const handleOutdatedArtifacts = async (context, github, newComment, outdatedComments, outdatedCommentTemplate) => {
