@@ -39,7 +39,7 @@ const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
         const link = `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${art.id}`;
         return `${acc}\n* [${name}](${link})`;
     }, '');
-    return `${tag}${header}\n${body}`;
+    return `${tag}\n${header}\n${body}`;
 };
 const findOutdatedComments = async (context, github, issueNumber) => {
     const { repo: { owner, repo }, } = context;
@@ -84,7 +84,7 @@ const handleOutdatedArtifacts = async (context, github, newComment, outdatedComm
             Nothing: () => '**These artifacts are outdated and have been deleted. ' +
                 `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
         });
-        const taggedBody = `${tag}${body}`;
+        const taggedBody = `${tag}\n${body}`;
         await github.rest.issues.updateComment({
             repo,
             owner,

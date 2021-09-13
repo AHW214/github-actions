@@ -38,7 +38,7 @@ const makeCommentBody = (
     return `${acc}\n* [${name}](${link})`;
   }, '');
 
-  return `${tag}${header}\n${body}`;
+  return `${tag}\n${header}\n${body}`;
 };
 
 const findOutdatedComments = async (
@@ -114,7 +114,7 @@ const handleOutdatedArtifacts = async (
         `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
     });
 
-    const taggedBody = `${tag}${body}`;
+    const taggedBody = `${tag}\n${body}`;
 
     await github.rest.issues.updateComment({
       repo,
