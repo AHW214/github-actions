@@ -3,13 +3,13 @@ import { context as globalContext } from '@actions/github';
 import type { Context } from '@actions/github/lib/context';
 import { Maybe } from 'purify-ts';
 
-import { attempt, withGithubClient } from './control/run';
-import type { WorkflowRunArtifact } from './data/artifact';
-import type { IssueComment } from './data/comment';
-import { authorIsBot } from './data/comment';
-import type { GithubClient } from './data/github-client';
-import { getInputMaybe } from './data/github-client';
-import { mapFalsy } from './data/maybe';
+import { attempt, withGithubClient } from 'control/run';
+import type { WorkflowRunArtifact } from 'data/artifact';
+import type { IssueComment } from 'data/comment';
+import { authorIsBot } from 'data/comment';
+import type { GithubClient } from 'data/github-client';
+import { getInputMaybe } from 'data/github-client';
+import { mapFalsy } from 'data/maybe';
 
 type CommentInfo = {
   artifactIds: Array<number>;

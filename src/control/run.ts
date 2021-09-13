@@ -3,7 +3,7 @@ export { attempt, withGithubClient };
 import * as core from '@actions/core';
 import { getOctokit } from '@actions/github';
 
-import type { GithubClient } from '../data/github-client';
+import type { GithubClient } from 'data/github-client';
 
 const attempt = async <T>(run: () => Promise<T>): Promise<T | undefined> => {
   try {
