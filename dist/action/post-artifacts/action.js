@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
+const codec_1 = require("./codec");
 const run_1 = require("../../control/run");
 const artifact_1 = require("../../data/artifact");
 const comment_1 = require("../../data/comment");
@@ -98,20 +99,7 @@ const postNewComment = async (context, github, issueNumber, body) => {
     return data;
 };
 const run = async (context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts) => {
-    var _a, _b;
-    const { payload: { workflow_run: workflowRun }, repo: { owner, repo }, } = context;
-    const runId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.id;
-    const checkSuiteId = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.check_suite_id;
-    const issueNumber = (_b = (_a = workflowRun === null || workflowRun === void 0 ? void 0 : workflowRun.pull_requests) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.number;
-    if (runId === undefined) {
-        return core.error('No workflow run found');
-    }
-    if (checkSuiteId === undefined) {
-        return core.error('No check suite found');
-    }
-    if (issueNumber === undefined) {
-        return core.error('No issue number found');
-    }
+    const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId, pull_requests: [{ number: issueNumber }], }, }, } = context;
     core.info(`Posting to pull request #${issueNumber}`);
     const { data: { artifacts }, } = await github.rest.actions.listWorkflowRunArtifacts({
         owner,
@@ -134,6 +122,9 @@ run_1.attempt(() => {
     const commentHeader = github_client_2.getInputMaybe('comment-header');
     const outdatedCommentTemplate = github_client_2.getInputMaybe('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return run_1.withGithubClient((github) => run(github_1.context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts));
+    return codec_1.Context.decode(github_1.context).caseOf({
+        Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
+        Right: (context) => run_1.withGithubClient((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
+    });
 });
 //# sourceMappingURL=action.js.map
