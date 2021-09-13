@@ -9,12 +9,14 @@ import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
 import type { GithubClient } from 'data/github-client';
 import { getInputMaybe } from 'data/github-client';
-import { mapFalsy } from 'data/maybe';
+import { mapMaybe } from 'data/maybe';
 
 type CommentInfo = {
   artifactIds: Array<number>;
   commentId: number;
 };
+
+const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 
 const makeCommentBody = (
   context: Context,
@@ -26,13 +28,17 @@ const makeCommentBody = (
     repo: { owner, repo },
   } = context;
 
-  const header = commentHeader.orDefault('Download your builds below:\n');
+  const tag = `<!-- ${COMMENT_TAG} -->`;
 
-  return artifacts.reduce((acc, art) => {
+  const header = commentHeader.orDefault('Download your builds below:');
+
+  const body = artifacts.reduce((acc, art) => {
     const name = `${art.name}.zip`;
     const link = `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${art.id}`;
     return `${acc}\n* [${name}](${link})`;
-  }, header);
+  }, '');
+
+  return `${tag}${header}\n${body}`;
 };
 
 const findOutdatedComments = async (
@@ -50,20 +56,23 @@ const findOutdatedComments = async (
     issue_number: issueNumber,
   });
 
+  const regexTag = new RegExp(COMMENT_TAG);
+
   const regexArtifact = new RegExp(
     `${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`,
     'g',
   );
 
-  return mapFalsy((comment) => {
-    if (!authorIsBot(comment) || !comment.body) return undefined;
+  return mapMaybe((comment) => {
+    if (!authorIsBot(comment) || !comment.body || !regexTag.test(comment.body))
+      return undefined;
 
     const matches = [...comment.body.matchAll(regexArtifact)];
     const artifactIds = matches
       .map((m) => Number(m[1]))
       .filter((id) => !isNaN(id));
 
-    return artifactIds.length > 0 && { commentId: comment.id, artifactIds };
+    return { commentId: comment.id, artifactIds };
   }, comments);
 };
 
@@ -94,7 +103,7 @@ const handleOutdatedArtifacts = async (
       }
     }
 
-    core.info(`Marking comment ${commentId} as outdated`);
+    core.info(`Updating outdated comment ${commentId}`);
 
     const body = outdatedCommentTemplate.caseOf({
       Just: (template) => template.replace(':new-comment', newComment.html_url),
