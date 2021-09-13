@@ -13,7 +13,9 @@
     "noUnusedLocals": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "plugins": [{ "transform": "ts-transformer-imports" }]
   },
   "exclude": ["node_modules"]
 }
