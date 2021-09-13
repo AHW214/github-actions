@@ -4,7 +4,7 @@
   "private": true,
   "description": "Helpful GitHub actions",
   "scripts": {
-    "build": "ttsc",
+    "build": "rm -rf dist/* && ttsc",
     "format": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
