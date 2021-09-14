@@ -32,9 +32,9 @@ const run = async (
     per_page: 100,
   });
 
-  core.info(JSON.stringify(workflowRuns));
+  core.info(`Found ${workflowRuns.length} workflow runs for branch ${ref}`);
 
-  const results = await Promise.all(
+  const artifactsNested = await Promise.all(
     workflowRuns.map(async ({ id }) => {
       const {
         data: { artifacts },
@@ -49,9 +49,18 @@ const run = async (
     }),
   );
 
-  const artifacts = flatten(results);
+  const artifacts = flatten(artifactsNested);
 
-  core.info(JSON.stringify(artifacts));
+  core.info(`Found ${artifacts.length} artifacts for all workflow runs`);
+
+  for (const art of artifacts) {
+    core.info(`Deleting artifact ${art.id}`);
+    await github.rest.actions.deleteArtifact({
+      owner,
+      repo,
+      artifact_id: art.id,
+    });
+  }
 };
 
 attempt(() => {

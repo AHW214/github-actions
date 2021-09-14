@@ -39,8 +39,8 @@ const run = async (context, github) => {
         branch: ref,
         per_page: 100,
     });
-    core.info(JSON.stringify(workflowRuns));
-    const results = await Promise.all(workflowRuns.map(async ({ id }) => {
+    core.info(`Found ${workflowRuns.length} workflow runs for branch ${ref}`);
+    const artifactsNested = await Promise.all(workflowRuns.map(async ({ id }) => {
         const { data: { artifacts }, } = await github.rest.actions.listWorkflowRunArtifacts({
             owner,
             repo,
@@ -49,8 +49,34 @@ const run = async (context, github) => {
         });
         return artifacts;
     }));
-    const artifacts = (0, array_1.flatten)(results);
-    core.info(JSON.stringify(artifacts));
+    const artifacts = (0, array_1.flatten)(artifactsNested);
+    core.info(`Found ${artifacts.length} artifacts for all workflow runs`);
+    for (const art of artifacts) {
+        core.info(`Deleting artifact ${art.id}`);
+        await github.rest.actions.deleteArtifact({
+            owner,
+            repo,
+            artifact_id: art.id,
+        });
+    }
+    const { data: pullRequests } = await github.rest.pulls.list({
+        owner,
+        repo,
+        head: `${owner}:${ref}`,
+        state: 'closed',
+        per_page: 100,
+    });
+    const commentsNested = await Promise.all(pullRequests.map(async ({ number }) => {
+        const { data: comments } = await github.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number: number,
+            per_page: 100,
+        });
+        return comments;
+    }));
+    const comments = (0, array_1.flatten)(commentsNested);
+    core.info(JSON.stringify(comments));
 };
 (0, run_1.attempt)(() => {
     return (0, codec_2.decode)(github_1.context).caseOf({
