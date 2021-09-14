@@ -47,7 +47,7 @@ const withGithubClient = async (run) => {
             },
         }
         : undefined;
-    const github = github_1.getOctokit(token, opts);
+    const github = (0, github_1.getOctokit)(token, opts);
     return run(github);
 };
 exports.withGithubClient = withGithubClient;

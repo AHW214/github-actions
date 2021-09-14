@@ -1,6 +1,16 @@
 name: Prune Artifacts
 description: Prune artifacts when their source branch is deleted.
 author: AHW214
+inputs:
+  github-token:
+    required: true
+    description: >
+      [String] Token for communicating with the GitHub API.
+  debug:
+    required: false
+    default: false
+    description: >
+      [Bool] Whether to log GitHub API calls in the action output.
 runs:
   using: 'node12'
   main: '../dist/action/prune-artifacts/run.js'

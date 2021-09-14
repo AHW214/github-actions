@@ -2,11 +2,13 @@ import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import { Just, Maybe, Nothing } from 'purify-ts';
 
-import { Context, decode } from 'action/post-artifacts/codec';
+import type { Payload } from 'action/post-artifacts/codec';
+import { decode } from 'action/post-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
+import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 import { getInputMaybe } from 'data/github-client';
 
@@ -18,7 +20,7 @@ type CommentInfo = {
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 
 const makeCommentBody = (
-  context: Context,
+  context: Context<Payload>,
   checkSuiteId: number,
   artifacts: Array<WorkflowRunArtifact>,
   commentHeader: Maybe<string>,
@@ -41,7 +43,7 @@ const makeCommentBody = (
 };
 
 const findOutdatedComments = async (
-  context: Context,
+  context: Context<Payload>,
   github: GithubClient,
   issueNumber: number,
 ): Promise<Array<CommentInfo>> => {
@@ -76,7 +78,7 @@ const findOutdatedComments = async (
 };
 
 const handleOutdatedArtifacts = async (
-  context: Context,
+  context: Context<Payload>,
   github: GithubClient,
   newComment: IssueComment,
   outdatedComments: Array<CommentInfo>,
@@ -125,7 +127,7 @@ const handleOutdatedArtifacts = async (
 };
 
 const postNewComment = async (
-  context: Context,
+  context: Context<Payload>,
   github: GithubClient,
   issueNumber: number,
   body: string,
@@ -147,7 +149,7 @@ const postNewComment = async (
 };
 
 const run = async (
-  context: Context,
+  context: Context<Payload>,
   github: GithubClient,
   commentHeader: Maybe<string>,
   outdatedCommentTemplate: Maybe<string>,
