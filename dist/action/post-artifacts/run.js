@@ -23,10 +23,12 @@ const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
 const purify_ts_1 = require("purify-ts");
 const codec_1 = require("./codec");
+const codec_2 = require("./codec");
 const run_1 = require("../../control/run");
 const artifact_1 = require("../../data/artifact");
 const comment_1 = require("../../data/comment");
 const comment_2 = require("../../data/comment");
+const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const github_client_2 = require("../../data/github-client");
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
@@ -128,7 +130,7 @@ const run = async (context, github, commentHeader, outdatedCommentTemplate, remo
     const commentHeader = (0, github_client_2.getInputMaybe)('comment-header');
     const outdatedCommentTemplate = (0, github_client_2.getInputMaybe)('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return (0, codec_1.decode)(github_1.context).caseOf({
+    return (0, codec_2.decode)(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
         Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
     });
