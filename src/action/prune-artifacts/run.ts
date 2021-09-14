@@ -1,12 +1,31 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
+import { Just, Maybe, Nothing } from 'purify-ts';
 
 import type { Payload } from 'action/prune-artifacts/codec';
 import { decode } from 'action/prune-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
-import { Context } from 'data/context';
-import { GithubClient } from 'data/github-client';
+import type { IssueComment } from 'data/comment';
+import { authorIsBot } from 'data/comment';
+import type { Context } from 'data/context';
+import type { GithubClient } from 'data/github-client';
 import { flatten } from 'util/array';
+
+const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
+
+const findPostArtifactComments = (
+  comments: Array<IssueComment>,
+): Array<IssueComment> => {
+  const regexTag = new RegExp(COMMENT_TAG);
+
+  return Maybe.mapMaybe(
+    (comment) =>
+      authorIsBot(comment) && comment.body && regexTag.test(comment.body)
+        ? Just(comment)
+        : Nothing,
+    comments,
+  );
+};
 
 const run = async (
   context: Context<Payload>,
@@ -84,8 +103,23 @@ const run = async (
   );
 
   const comments = flatten(commentsNested);
+  const postArtifactComments = findPostArtifactComments(comments);
 
-  core.info(JSON.stringify(comments));
+  for (const comment of postArtifactComments) {
+    core.info(`Updating outdated artifact post comment ${comment.id}`);
+
+    const tag = `<!-- ${COMMENT_TAG} -->`;
+    const body = '**These artifacts have been deleted.**';
+
+    const taggedBody = `${tag}\n${body}`;
+
+    await github.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: comment.id,
+      body: taggedBody,
+    });
+  }
 };
 
 attempt(() => {
