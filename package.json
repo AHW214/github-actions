@@ -26,6 +26,7 @@
     "@typescript-eslint/parser": "^4.28.3",
     "eslint": "^7.31.0",
     "eslint-plugin-github": "^4.1.1",
+    "eslint-plugin-prettier": "^4.0.0",
     "js-yaml": "^4.1.0",
     "prettier": "2.2.1",
     "ts-transformer-imports": "^0.4.3",

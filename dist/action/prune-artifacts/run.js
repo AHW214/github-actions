@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
 const run_1 = require("../../control/run");
-run_1.attempt(() => {
+(0, run_1.attempt)(() => {
     core.info(JSON.stringify(github_1.context));
 });
 //# sourceMappingURL=run.js.map

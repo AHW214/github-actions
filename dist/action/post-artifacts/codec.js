@@ -8,7 +8,7 @@ const PullRequest = purify_ts_1.Codec.interface({
 const WorkflowRun = purify_ts_1.Codec.interface({
     id: purify_ts_1.number,
     check_suite_id: purify_ts_1.number,
-    pull_requests: purify_ts_1.nonEmptyList(PullRequest),
+    pull_requests: (0, purify_ts_1.nonEmptyList)(PullRequest),
 });
 const Payload = purify_ts_1.Codec.interface({
     workflow_run: WorkflowRun,

@@ -51,13 +51,13 @@ const findOutdatedComments = async (context, github, issueNumber) => {
     const regexTag = new RegExp(COMMENT_TAG);
     const regexArtifact = new RegExp(`${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`, 'g');
     return purify_ts_1.Maybe.mapMaybe((comment) => {
-        if (!comment_2.authorIsBot(comment) || !comment.body || !regexTag.test(comment.body))
+        if (!(0, comment_2.authorIsBot)(comment) || !comment.body || !regexTag.test(comment.body))
             return purify_ts_1.Nothing;
         const matches = [...comment.body.matchAll(regexArtifact)];
         const artifactIds = matches
             .map((m) => Number(m[1]))
             .filter((id) => !isNaN(id));
-        return purify_ts_1.Just({ commentId: comment.id, artifactIds });
+        return (0, purify_ts_1.Just)({ commentId: comment.id, artifactIds });
     }, comments);
 };
 const handleOutdatedArtifacts = async (context, github, newComment, outdatedComments, outdatedCommentTemplate) => {
@@ -124,13 +124,13 @@ const run = async (context, github, commentHeader, outdatedCommentTemplate, remo
     const newComment = await postNewComment(context, github, issueNumber, body);
     await handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
 };
-run_1.attempt(() => {
-    const commentHeader = github_client_2.getInputMaybe('comment-header');
-    const outdatedCommentTemplate = github_client_2.getInputMaybe('outdated-comment-template');
+(0, run_1.attempt)(() => {
+    const commentHeader = (0, github_client_2.getInputMaybe)('comment-header');
+    const outdatedCommentTemplate = (0, github_client_2.getInputMaybe)('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return codec_1.decode(github_1.context).caseOf({
+    return (0, codec_1.decode)(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-        Right: (context) => run_1.withGithubClient((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
+        Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
     });
 });
 //# sourceMappingURL=run.js.map
