@@ -1,4 +1,3 @@
 name: Prune Artifacts
 description: Prune artifacts when their source branch is deleted.
 author: AHW214
-inputs:
