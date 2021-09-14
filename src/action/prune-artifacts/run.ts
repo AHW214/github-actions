@@ -61,6 +61,31 @@ const run = async (
       artifact_id: art.id,
     });
   }
+
+  const { data: pullRequests } = await github.rest.pulls.list({
+    owner,
+    repo,
+    head: `${owner}:${ref}`,
+    state: 'closed',
+    per_page: 100,
+  });
+
+  const commentsNested = await Promise.all(
+    pullRequests.map(async ({ number }) => {
+      const { data: comments } = await github.rest.issues.listComments({
+        owner,
+        repo,
+        issue_number: number,
+        per_page: 100,
+      });
+
+      return comments;
+    }),
+  );
+
+  const comments = flatten(commentsNested);
+
+  core.info(JSON.stringify(comments));
 };
 
 attempt(() => {
