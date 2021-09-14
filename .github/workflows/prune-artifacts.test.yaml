@@ -1,0 +1,11 @@
+name: 'Test: Prune Artifacts Action'
+
+on:
+  delete:
+
+jobs:
+  test-prune-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./prune-artifacts
