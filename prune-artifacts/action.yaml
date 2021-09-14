@@ -1,3 +1,6 @@
 name: Prune Artifacts
 description: Prune artifacts when their source branch is deleted.
 author: AHW214
+runs:
+  using: 'node12'
+  main: '../dist/action/prune-artifacts/run.js'
