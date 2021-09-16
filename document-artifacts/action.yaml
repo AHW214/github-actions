@@ -2,7 +2,7 @@ name: Document Artifacts
 description: Document artifacts using template files.
 author: AHW214
 inputs:
-   github-token:
+  github-token:
     required: true
     description: >
       [String] Token for communicating with the GitHub API.
