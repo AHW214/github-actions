@@ -20,8 +20,17 @@ const artifactView = (
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
 ): ArtifactView => ({
-  name: `${name}.zip`,
+  name,
   url: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+});
+
+const thing = (
+  owner: string,
+  repo: string,
+  checkSuiteId: number,
+  { name, id }: WorkflowRunArtifact,
+) => ({
+  [name]: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
 });
 
 const run = async (
@@ -52,8 +61,11 @@ const run = async (
     artifactView(owner, repo, checkSuiteId, art),
   );
 
+  const things = artifacts.map((art) => thing(owner, repo, checkSuiteId, art));
+
   const rendered = mustache.render(template, {
     artifacts: artifactViews,
+    ...things,
   });
 
   core.info(rendered);
