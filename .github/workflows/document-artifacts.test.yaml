@@ -17,5 +17,14 @@ jobs:
           template: |
             Here are your artifacts:
             {{#artifacts}}
-            * [{{name}}]({{url}})
+            * [{{name}}.zip]({{url}})
             {{/artifacts}}
+
+            Specific artifacts:
+            {{#artifact 1}}
+            1. [artifact 1]({{artifact 1}})
+            {{/artifact 1}}
+
+            {{#artifact 2}}
+            2. [artifact 2]({{artifact 2}})
+            {{/artifact 2}}
