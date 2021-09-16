@@ -1,0 +1,20 @@
+name: Document Artifacts
+description: Document artifacts using template files.
+author: AHW214
+inputs:
+   github-token:
+    required: true
+    description: >
+      [String] Token for communicating with the GitHub API.
+  template:
+    required: true
+    description: >
+      [String] Template in which to document artifacts.
+  debug:
+    required: false
+    default: false
+    description: >
+      [Bool] Whether to log GitHub API calls in the action output.
+runs:
+  using: 'node12'
+  main: '../dist/action/document-artifacts/run.js'

@@ -23,6 +23,7 @@
     "purify-ts": "^1.0.0"
   },
   "devDependencies": {
+    "@types/mustache": "^4.1.2",
     "@types/node": "^16.3.3",
     "@typescript-eslint/parser": "^4.28.3",
     "eslint": "^7.31.0",
