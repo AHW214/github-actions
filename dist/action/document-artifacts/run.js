@@ -49,7 +49,8 @@ const run = async (context, github, template) => {
         return core.info('No artifacts to document, exiting...');
     }
     const artifactViews = artifacts.map((art) => artifactView(owner, repo, checkSuiteId, art));
-    const things = artifacts.map((art) => thing(owner, repo, checkSuiteId, art));
+    const things = artifacts.reduce((acc, art) => ({ ...acc, ...thing(owner, repo, checkSuiteId, art) }), {});
+    core.info(JSON.stringify(things));
     const rendered = mustache_1.default.render(template, {
         artifacts: artifactViews,
         ...things,
