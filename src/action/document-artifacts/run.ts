@@ -61,7 +61,12 @@ const run = async (
     artifactView(owner, repo, checkSuiteId, art),
   );
 
-  const things = artifacts.map((art) => thing(owner, repo, checkSuiteId, art));
+  const things = artifacts.reduce<{ [x: string]: string }>(
+    (acc, art) => ({ ...acc, ...thing(owner, repo, checkSuiteId, art) }),
+    {},
+  );
+
+  core.info(JSON.stringify(things));
 
   const rendered = mustache.render(template, {
     artifacts: artifactViews,
