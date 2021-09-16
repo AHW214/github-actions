@@ -32,8 +32,11 @@ const artifact_1 = require("../../data/artifact");
 const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const artifactView = (owner, repo, checkSuiteId, { name, id }) => ({
-    name: `${name}.zip`,
+    name,
     url: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+});
+const thing = (owner, repo, checkSuiteId, { name, id }) => ({
+    [name]: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
 });
 const run = async (context, github, template) => {
     const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId }, }, } = context;
@@ -46,8 +49,11 @@ const run = async (context, github, template) => {
         return core.info('No artifacts to document, exiting...');
     }
     const artifactViews = artifacts.map((art) => artifactView(owner, repo, checkSuiteId, art));
+    const things = artifacts.reduce((acc, art) => ({ ...acc, ...thing(owner, repo, checkSuiteId, art) }), {});
+    core.info(JSON.stringify(things));
     const rendered = mustache_1.default.render(template, {
         artifacts: artifactViews,
+        ...things,
     });
     core.info(rendered);
 };
