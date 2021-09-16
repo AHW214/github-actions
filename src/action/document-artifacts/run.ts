@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import mustache from 'mustache';
+import { Either } from 'purify-ts';
 
 import type { Payload } from 'action/document-artifacts/codec';
 import { decode } from 'action/document-artifacts/codec';
@@ -8,6 +9,7 @@ import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
+import { getInputEither } from 'data/github-client';
 
 type ArtifactEntries = {
   [name: string]: string;
@@ -48,7 +50,7 @@ const mkArtifactListEntry = (
 const run = async (
   context: Context<Payload>,
   github: GithubClient,
-  template: string,
+  template: Either<string, string>,
 ): Promise<void> => {
   const {
     repo: { owner, repo },
@@ -87,11 +89,17 @@ const run = async (
 };
 
 attempt(() => {
-  const template = core.getInput('template', { required: true });
+  // todo - used tagged types for clarity
+  const input = getInputEither({ name: 'template' }, { name: 'output-path' });
 
-  return decode(globalContext).caseOf({
-    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-    Right: (context) =>
-      withGithubClient((github) => run(context, github, template)),
+  return input.caseOf({
+    Nothing: () => core.setFailed('bad'),
+    Just: (template) =>
+      decode(globalContext).caseOf({
+        Left: (err) =>
+          core.setFailed(`Failed to decode action context: ${err}`),
+        Right: (context) =>
+          withGithubClient((github) => run(context, github, template)),
+      }),
   });
 });
