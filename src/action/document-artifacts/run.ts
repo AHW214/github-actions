@@ -9,28 +9,40 @@ import type { WorkflowRunArtifact } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 
-type ArtifactView = {
+type ArtifactEntry = {
+  [name: string]: string;
+};
+
+type ArtifactListEntry = {
   name: string;
   url: string;
 };
 
-const artifactView = (
+const mkArtifactUrl = (
+  owner: string,
+  repo: string,
+  checkSuiteId: number,
+  artifactId: number,
+) =>
+  `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${artifactId}`;
+
+const mkArtifactEntry = (
   owner: string,
   repo: string,
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
-): ArtifactView => ({
-  name,
-  url: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+): ArtifactEntry => ({
+  [name]: mkArtifactUrl(owner, repo, checkSuiteId, id),
 });
 
-const thing = (
+const mkArtifactListEntry = (
   owner: string,
   repo: string,
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
-) => ({
-  [name]: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+): ArtifactListEntry => ({
+  name,
+  url: mkArtifactUrl(owner, repo, checkSuiteId, id),
 });
 
 const run = async (
@@ -57,20 +69,18 @@ const run = async (
     return core.info('No artifacts to document, exiting...');
   }
 
-  const artifactViews = artifacts.map((art) =>
-    artifactView(owner, repo, checkSuiteId, art),
-  );
+  const artifactEntries = artifacts.reduce<ArtifactEntry>((acc, art) => {
+    const entry = mkArtifactEntry(owner, repo, checkSuiteId, art);
+    return { ...acc, ...entry };
+  }, {});
 
-  const things = artifacts.reduce<{ [x: string]: string }>(
-    (acc, art) => ({ ...acc, ...thing(owner, repo, checkSuiteId, art) }),
-    {},
+  const artifactListEntries = artifacts.map((art) =>
+    mkArtifactListEntry(owner, repo, checkSuiteId, art),
   );
-
-  core.info(JSON.stringify(things));
 
   const rendered = mustache.render(template, {
-    artifacts: artifactViews,
-    ...things,
+    artifacts: artifactListEntries,
+    ...artifactEntries,
   });
 
   core.info(rendered);
