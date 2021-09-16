@@ -19,6 +19,7 @@
   "dependencies": {
     "@actions/core": "^1.4.0",
     "@actions/github": "^5.0.0",
+    "mustache": "^4.2.0",
     "purify-ts": "^1.0.0"
   },
   "devDependencies": {
