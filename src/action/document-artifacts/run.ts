@@ -9,7 +9,7 @@ import type { WorkflowRunArtifact } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 
-type ArtifactEntry = {
+type ArtifactEntries = {
   [name: string]: string;
 };
 
@@ -31,7 +31,7 @@ const mkArtifactEntry = (
   repo: string,
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
-): ArtifactEntry => ({
+): ArtifactEntries => ({
   [name]: mkArtifactUrl(owner, repo, checkSuiteId, id),
 });
 
@@ -69,7 +69,7 @@ const run = async (
     return core.info('No artifacts to document, exiting...');
   }
 
-  const artifactEntries = artifacts.reduce<ArtifactEntry>((acc, art) => {
+  const artifactEntries = artifacts.reduce<ArtifactEntries>((acc, art) => {
     const entry = mkArtifactEntry(owner, repo, checkSuiteId, art);
     return { ...acc, ...entry };
   }, {});
