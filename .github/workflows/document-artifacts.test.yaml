@@ -6,7 +6,11 @@ on:
     types: [completed]
 
 jobs:
+<<<<<<< HEAD
   test-document-artifacts:
+=======
+  test-post-artifacts:
+>>>>>>> ff72532 (Init document artifacts.)
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
