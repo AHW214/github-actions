@@ -6,10 +6,18 @@ inputs:
     required: true
     description: >
       [String] Token for communicating with the GitHub API.
-  template:
+  output-path:
     required: true
     description: >
-      [String] Template in which to document artifacts.
+      [String] Path at which to output the rendered template.
+  template-path:
+    required: false
+    description: >
+      [String] Path to the template in which to document artifacts.
+  template-text:
+    required: false
+    description: >
+      [String] Text of the template in which to document artifacts.
   debug:
     required: false
     default: false

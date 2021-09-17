@@ -14,17 +14,10 @@ jobs:
       - uses: ./document-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          template: |
-            Here are your artifacts:
-            {{#artifacts}}
-            * [{{name}}.zip]({{url}})
-            {{/artifacts}}
-
-            Specific artifacts:
-            {{#artifact 1}}
-            1. [artifact 1]({{artifact 1}})
-            {{/artifact 1}}
-
-            {{#artifact 2}}
-            2. [artifact 2]({{artifact 2}})
-            {{/artifact 2}}
+          output-path: ./test/document-artifacts/output.md
+          template-path: ./test/document-artifacts/template.md
+      - run: |
+          git config --global user.name 'AHW214'
+          git config --global user.email 'AHW214@users.noreply.github.com'
+          git commit -am "[TEST] Push artifacts document."
+          git push

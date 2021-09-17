@@ -1,39 +1,39 @@
-export { GithubClient, getInputEither, getInputMaybe };
+export { GithubClient, getInputOneOf, getInputMaybe };
 
 import { InputOptions, getInput } from '@actions/core';
 import type { GitHub } from '@actions/github/lib/utils';
-import { Either, Maybe } from 'purify-ts';
-
-import * as either from 'data/either';
+import { Maybe } from 'purify-ts';
 
 type GithubClient = InstanceType<typeof GitHub>;
 
-type ParamsGetInput<Name extends string> = {
-  name: Name;
-  options?: InputOptions;
-};
-
-type Input<Name extends string> = {
-  name: Name;
-  value: string;
-};
+type OneOfResult<T extends string> =
+  | { type: 'None' }
+  | { type: 'Many'; names: [string, string, ...string[]] }
+  | { type: 'One'; name: T; value: string };
 
 const getInputMaybe = (name: string, options?: InputOptions): Maybe<string> =>
   Maybe.encase(() => getInput(name, { ...options, required: true }));
 
-const getInputEither = <First extends string, Second extends string>(
-  first: ParamsGetInput<First>,
-  second: ParamsGetInput<Second>,
-): Maybe<Either<Input<First>, Input<Second>>> => {
-  const maybeFirst = getInputMaybe(first.name, first.options).map((value) => ({
-    name: first.name,
-    value,
-  }));
+const getInputOneOf = <T extends Array<string>>(
+  ...names: T
+): OneOfResult<T[number]> => {
+  const getInput = (name: string): Maybe<{ name: string; value: string }> =>
+    getInputMaybe(name).map((value) => ({ name, value }));
 
-  const maybeSecond = getInputMaybe(
-    second.name,
-    second.options,
-  ).map((value) => ({ name: second.name, value }));
+  const inputs = Maybe.mapMaybe(getInput, names);
 
-  return either.fromMaybes(maybeFirst, maybeSecond);
+  if (inputs.length <= 0) {
+    return { type: 'None' };
+  }
+
+  if (inputs.length > 1) {
+    const names = inputs.map(({ name }) => name);
+    const [first, second, ...rest] = names;
+
+    return { type: 'Many', names: [first, second, ...rest] };
+  }
+
+  const [{ name, value }] = inputs;
+
+  return { type: 'One', name, value };
 };
