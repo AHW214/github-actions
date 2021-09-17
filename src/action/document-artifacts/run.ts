@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
+import * as fs from 'fs';
 import mustache from 'mustache';
 
 import type { Payload } from 'action/document-artifacts/codec';
@@ -8,35 +9,51 @@ import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
+import { getInputOneOf } from 'data/github-client';
 
-type ArtifactView = {
+type TemplateInput = { name: 'template-text' | 'template-path'; value: string };
+
+type ArtifactEntries = {
+  [name: string]: string;
+};
+
+type ArtifactListEntry = {
   name: string;
   url: string;
 };
 
-const artifactView = (
+const mkArtifactUrl = (
+  owner: string,
+  repo: string,
+  checkSuiteId: number,
+  artifactId: number,
+) =>
+  `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${artifactId}`;
+
+const mkArtifactEntry = (
   owner: string,
   repo: string,
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
-): ArtifactView => ({
-  name,
-  url: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+): ArtifactEntries => ({
+  [name]: mkArtifactUrl(owner, repo, checkSuiteId, id),
 });
 
-const thing = (
+const mkArtifactListEntry = (
   owner: string,
   repo: string,
   checkSuiteId: number,
   { name, id }: WorkflowRunArtifact,
-) => ({
-  [name]: `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${id}`,
+): ArtifactListEntry => ({
+  name,
+  url: mkArtifactUrl(owner, repo, checkSuiteId, id),
 });
 
 const run = async (
   context: Context<Payload>,
   github: GithubClient,
-  template: string,
+  templateInput: TemplateInput,
+  templateOutput: string,
 ): Promise<void> => {
   const {
     repo: { owner, repo },
@@ -44,6 +61,11 @@ const run = async (
       workflow_run: { id: runId, check_suite_id: checkSuiteId },
     },
   } = context;
+
+  const template =
+    templateInput.name === 'template-path'
+      ? fs.readFileSync(templateInput.value, 'utf-8')
+      : templateInput.value;
 
   const {
     data: { artifacts },
@@ -57,31 +79,40 @@ const run = async (
     return core.info('No artifacts to document, exiting...');
   }
 
-  const artifactViews = artifacts.map((art) =>
-    artifactView(owner, repo, checkSuiteId, art),
-  );
+  const artifactEntries = artifacts.reduce<ArtifactEntries>((acc, art) => {
+    const entry = mkArtifactEntry(owner, repo, checkSuiteId, art);
+    return { ...acc, ...entry };
+  }, {});
 
-  const things = artifacts.reduce<{ [x: string]: string }>(
-    (acc, art) => ({ ...acc, ...thing(owner, repo, checkSuiteId, art) }),
-    {},
+  const artifactListEntries = artifacts.map((art) =>
+    mkArtifactListEntry(owner, repo, checkSuiteId, art),
   );
-
-  core.info(JSON.stringify(things));
 
   const rendered = mustache.render(template, {
-    artifacts: artifactViews,
-    ...things,
+    artifacts: artifactListEntries,
+    ...artifactEntries,
   });
 
-  core.info(rendered);
+  core.info(`Writing template to ${templateOutput}`);
+
+  fs.writeFileSync(templateOutput, rendered, 'utf-8');
 };
 
 attempt(() => {
-  const template = core.getInput('template', { required: true });
+  const templateOutput = core.getInput('output-path');
+  const templateInput = getInputOneOf('template-text', 'template-path');
+
+  if (templateInput.type === 'Many')
+    return core.setFailed(`Can only set one of ${templateInput.names}`);
+
+  if (templateInput.type === 'None')
+    return core.setFailed('Template source not specified.');
 
   return decode(globalContext).caseOf({
     Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
     Right: (context) =>
-      withGithubClient((github) => run(context, github, template)),
+      withGithubClient((github) =>
+        run(context, github, templateInput, templateOutput),
+      ),
   });
 });
