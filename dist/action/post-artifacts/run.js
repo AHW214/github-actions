@@ -35,7 +35,7 @@ const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
     const { repo: { owner, repo }, } = context;
     const tag = `<!-- ${COMMENT_TAG} -->`;
-    const header = commentHeader.orDefault('Download your builds below:');
+    const header = commentHeader.orDefault('Download your artifacts below:');
     const body = artifacts.reduce((acc, art) => {
         const name = `${art.name}.zip`;
         const link = `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${art.id}`;

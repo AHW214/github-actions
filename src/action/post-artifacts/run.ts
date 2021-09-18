@@ -31,7 +31,7 @@ const makeCommentBody = (
 
   const tag = `<!-- ${COMMENT_TAG} -->`;
 
-  const header = commentHeader.orDefault('Download your builds below:');
+  const header = commentHeader.orDefault('Download your artifacts below:');
 
   const body = artifacts.reduce((acc, art) => {
     const name = `${art.name}.zip`;
