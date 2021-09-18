@@ -18,9 +18,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
+const mustache_1 = __importDefault(require("mustache"));
 const purify_ts_1 = require("purify-ts");
 const codec_1 = require("./codec");
 const codec_2 = require("./codec");
@@ -82,7 +86,7 @@ const handleOutdatedArtifacts = async (context, github, newComment, outdatedComm
         core.info(`Updating outdated comment ${commentId}`);
         const tag = `<!-- ${COMMENT_TAG} -->`;
         const body = outdatedCommentTemplate.caseOf({
-            Just: (template) => template.replace(':new-comment', newComment.html_url),
+            Just: (template) => mustache_1.default.render(template, { 'new-comment': newComment.html_url }),
             Nothing: () => '**These artifacts are outdated and have been deleted. ' +
                 `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
         });

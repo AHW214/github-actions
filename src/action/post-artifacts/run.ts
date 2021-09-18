@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
+import mustache from 'mustache';
 import { Just, Maybe, Nothing } from 'purify-ts';
 
 import type { Payload } from 'action/post-artifacts/codec';
@@ -109,7 +110,9 @@ const handleOutdatedArtifacts = async (
     const tag = `<!-- ${COMMENT_TAG} -->`;
 
     const body = outdatedCommentTemplate.caseOf({
-      Just: (template) => template.replace(':new-comment', newComment.html_url),
+      Just: (template) =>
+        mustache.render(template, { 'new-comment': newComment.html_url }),
+
       Nothing: () =>
         '**These artifacts are outdated and have been deleted. ' +
         `View [this comment](${newComment.html_url}) for the most recent artifacts.**`,
