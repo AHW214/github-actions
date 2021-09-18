@@ -17,9 +17,9 @@ inputs:
   outdated-comment-template:
     required: false
     description: >
-      [String] Template to use when updating outdated comments. The variable
-      ":new-comment" will be interpolated as the URL to the most recently posted
-      comment with artifacts.
+      [String] Mustache template to use when updating outdated comments. The
+      value "new-comment" will be interpolated as the URL to the most recently
+      posted comment with artifacts.
   debug:
     required: false
     default: false
