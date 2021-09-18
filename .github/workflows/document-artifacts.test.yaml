@@ -15,7 +15,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: ./test/document-artifacts/output.md
-          template-path: ./test/document-artifacts/template.md
+          template-path: ./test/document-artifacts/template.mustache
       - run: |
           git config --global user.name "AHW214"
           git config --global user.email "AHW214@users.noreply.github.com"
