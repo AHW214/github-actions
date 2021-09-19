@@ -114,10 +114,10 @@ const run = async (
     dateformat(updatedAt, `$UTC:${mask}`);
 
   const updatedAtEntry: UpdatedAtEntry = {
-    dateIso: formatUpdatedAt('isoDate'),
-    dateMed: formatUpdatedAt('mediumDate'),
-    timeIso: formatUpdatedAt('isoTime'),
-    timeShort: formatUpdatedAt('shortTime'),
+    dateIso: formatUpdatedAt('yyyy-mm-dd'),
+    dateMed: formatUpdatedAt('mmm d, yyyy'),
+    timeIso: formatUpdatedAt('HH:MM:ss'),
+    timeShort: formatUpdatedAt('h:MM TT'),
   };
 
   const workflowRunEntry: WorkflowRunEntry = {
