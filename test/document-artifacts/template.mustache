@@ -1,8 +1,17 @@
+Artifacts made on {{ workflowRun.updatedAt.dateMed }}, at
+{{ workflowRun.updatedAt.timeShort }} UTC.
+
+Commit info:
+- Author: {{ workflowRun.headCommit.author }}
+- Message: {{ workflowRun.headCommit.message }}
+- SHA: {{ workflowRun.headSha }}
+- Head branch: {{ workflowRun.headBranch }}
+
 Here are your artifacts:
 {{# artifacts }}
-* [**{{ artifact.name }}** (zip) ({{ artifact.size }})]({{ artifact.url }})
+- [**{{ artifact.name }}** (zip) ({{ artifact.size }})]({{ artifact.url }})
 {{/ artifacts }}
 
 Here they are again:
-* [**Artifact 1** (zip) ({{ artifact-1.size }})]({{ artifact-1.url }})
-* [**Artifact 2** (zip) ({{ artifact-2.size }})]({{ artifact-2.url }})
+- [**Artifact 1** (zip) ({{ artifact-1.size }})]({{ artifact-1.url }})
+- [**Artifact 2** (zip) ({{ artifact-2.size }})]({{ artifact-2.url }})
