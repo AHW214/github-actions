@@ -1,17 +1,18 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import { Just, Maybe, Nothing } from 'purify-ts';
-import { array, number } from 'purify-ts';
+import { array } from 'purify-ts';
 
 import type { Payload } from 'action/prune-artifacts/codec';
 import { decode } from 'action/prune-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
+import type { WorkflowRunArtifact } from 'data/artifact';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 import { flatten, partition } from 'util/array';
-import { WorkflowRunArtifact } from 'data/artifact';
+import { numericString } from 'util/codec';
 
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 
@@ -155,7 +156,9 @@ const run = async (
 attempt(() => {
   const input = core.getMultilineInput('exclude-workflow-runs');
 
-  array(number)
+  core.info(JSON.stringify(globalContext.payload));
+
+  array(numericString)
     .decode(input)
     .caseOf({
       Left: (err) =>

@@ -26,12 +26,13 @@ const purify_ts_2 = require("purify-ts");
 const codec_1 = require("./codec");
 const codec_2 = require("./codec");
 const run_1 = require("../../control/run");
+const artifact_1 = require("../../data/artifact");
 const comment_1 = require("../../data/comment");
 const comment_2 = require("../../data/comment");
 const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const array_1 = require("../../util/array");
-const artifact_1 = require("../../data/artifact");
+const codec_3 = require("../../util/codec");
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 const findPostArtifactComments = (comments, removedArtifacts) => {
     const regexTag = new RegExp(COMMENT_TAG);
@@ -116,7 +117,8 @@ const run = async (context, github, excludeWorkflowRuns) => {
 };
 (0, run_1.attempt)(() => {
     const input = core.getMultilineInput('exclude-workflow-runs');
-    (0, purify_ts_2.array)(purify_ts_2.number)
+    core.info(JSON.stringify(github_1.context.payload));
+    (0, purify_ts_2.array)(codec_3.numericString)
         .decode(input)
         .caseOf({
         Left: (err) => core.setFailed(`Failed to parse input 'exclude-workflow-runs': ${err}`),
