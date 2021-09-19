@@ -2,12 +2,32 @@ name: 'Test: Prune Artifacts Action'
 
 on:
   delete:
+  workflow_run:
+    workflows:
+      - Generate Artifacts
+    types:
+      - completed
 
 jobs:
-  test-prune-artifacts:
+  test-prune-artifacts-deletion:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./prune-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-prune-artifacts-push:
+    if: |
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./prune-artifacts
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          exclude-workflow-runs: |
+            ${{ github.event.workflow_run.id }}
