@@ -1,6 +1,9 @@
 name: Generate Artifacts
 
 on:
+  push:
+    branches: [main]
+    paths-ignore: ['test/**']
   pull_request:
     types: [opened, reopened, synchronize]
 
