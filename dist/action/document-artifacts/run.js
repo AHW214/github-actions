@@ -73,6 +73,7 @@ const run = async (context, github, templateInput, templateOutput) => {
         return core.setFailed(`Can only set one of ${templateInput.names}`);
     if (templateInput.type === 'None')
         return core.setFailed('Template source not specified.');
+    core.info(JSON.stringify(github_1.context.payload));
     return (0, codec_2.decode)(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
         Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, templateInput, templateOutput)),

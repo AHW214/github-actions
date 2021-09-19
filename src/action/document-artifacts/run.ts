@@ -111,6 +111,8 @@ attempt(() => {
   if (templateInput.type === 'None')
     return core.setFailed('Template source not specified.');
 
+  core.info(JSON.stringify(globalContext.payload));
+
   return decode(globalContext).caseOf({
     Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
     Right: (context) =>
