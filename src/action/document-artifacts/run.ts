@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
+import dateformat from 'dateformat';
 import * as fs from 'fs';
 import mustache from 'mustache';
 import prettyBytes from 'pretty-bytes';
@@ -26,6 +27,26 @@ type ArtifactNamedEntries = {
 
 type ArtifactListEntry = {
   artifact: ArtifactEntry;
+};
+
+type CommitEntry = {
+  author: string;
+  message: string;
+};
+
+type UpdatedAtEntry = {
+  dateIso: string;
+  dateMed: string;
+  timeIso: string;
+  timeShort: string;
+};
+
+type WorkflowRunEntry = {
+  headBranch: string;
+  headCommit: CommitEntry;
+  headSha: string;
+  headShaShort: string;
+  updatedAt: UpdatedAtEntry;
 };
 
 const mkArtifactUrl = (
@@ -56,7 +77,14 @@ const run = async (
   const {
     repo: { owner, repo },
     payload: {
-      workflow_run: { id: runId, check_suite_id: checkSuiteId },
+      workflow_run: {
+        id: runId,
+        check_suite_id: checkSuiteId,
+        head_branch: headBranch,
+        head_commit: headCommit,
+        head_sha: headSha,
+        updated_at: updatedAt,
+      },
     },
   } = context;
 
@@ -77,6 +105,29 @@ const run = async (
     return core.info('No artifacts to document, exiting...');
   }
 
+  const commitEntry: CommitEntry = {
+    author: headCommit.author.name,
+    message: headCommit.message,
+  };
+
+  const formatUpdatedAt = (mask: string): string =>
+    dateformat(updatedAt, `$UTC:${mask}`);
+
+  const updatedAtEntry: UpdatedAtEntry = {
+    dateIso: formatUpdatedAt('isoDate'),
+    dateMed: formatUpdatedAt('mediumDate'),
+    timeIso: formatUpdatedAt('isoTime'),
+    timeShort: formatUpdatedAt('shortTime'),
+  };
+
+  const workflowRunEntry: WorkflowRunEntry = {
+    headBranch,
+    headCommit: commitEntry,
+    headSha,
+    headShaShort: headSha.substring(0, 7),
+    updatedAt: updatedAtEntry,
+  };
+
   const [artifactNamedEntries, artifactListEntries] = artifacts.reduce<
     [ArtifactNamedEntries, Array<ArtifactListEntry>]
   >(
@@ -92,8 +143,9 @@ const run = async (
   );
 
   const rendered = mustache.render(template, {
-    artifacts: artifactListEntries,
     ...artifactNamedEntries,
+    artifacts: artifactListEntries,
+    workflowRun: workflowRunEntry,
   });
 
   core.info(`Writing template to ${templateOutput}`);
@@ -110,8 +162,6 @@ attempt(() => {
 
   if (templateInput.type === 'None')
     return core.setFailed('Template source not specified.');
-
-  core.info(JSON.stringify(globalContext.payload));
 
   return decode(globalContext).caseOf({
     Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),

@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
+const dateformat_1 = __importDefault(require("dateformat"));
 const fs = __importStar(require("fs"));
 const mustache_1 = __importDefault(require("mustache"));
 const pretty_bytes_1 = __importDefault(require("pretty-bytes"));
@@ -41,7 +42,7 @@ const mkArtifactEntry = (owner, repo, checkSuiteId, artifact) => ({
     url: mkArtifactUrl(owner, repo, checkSuiteId, artifact.id),
 });
 const run = async (context, github, templateInput, templateOutput) => {
-    const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId }, }, } = context;
+    const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId, head_branch: headBranch, head_commit: headCommit, head_sha: headSha, updated_at: updatedAt, }, }, } = context;
     const template = templateInput.name === 'template-path'
         ? fs.readFileSync(templateInput.value, 'utf-8')
         : templateInput.value;
@@ -53,6 +54,24 @@ const run = async (context, github, templateInput, templateOutput) => {
     if (artifacts.length <= 0) {
         return core.info('No artifacts to document, exiting...');
     }
+    const commitEntry = {
+        author: headCommit.author.name,
+        message: headCommit.message,
+    };
+    const formatUpdatedAt = (mask) => (0, dateformat_1.default)(updatedAt, `$UTC:${mask}`);
+    const updatedAtEntry = {
+        dateIso: formatUpdatedAt('isoDate'),
+        dateMed: formatUpdatedAt('mediumDate'),
+        timeIso: formatUpdatedAt('isoTime'),
+        timeShort: formatUpdatedAt('shortTime'),
+    };
+    const workflowRunEntry = {
+        headBranch,
+        headCommit: commitEntry,
+        headSha,
+        headShaShort: headSha.substring(0, 7),
+        updatedAt: updatedAtEntry,
+    };
     const [artifactNamedEntries, artifactListEntries] = artifacts.reduce(([namedEntries, listEntries], artifact) => {
         const entry = mkArtifactEntry(owner, repo, checkSuiteId, artifact);
         const namedEntry = { [entry.name]: entry };
@@ -60,8 +79,9 @@ const run = async (context, github, templateInput, templateOutput) => {
         return [{ ...namedEntries, ...namedEntry }, [...listEntries, listEntry]];
     }, [{}, []]);
     const rendered = mustache_1.default.render(template, {
-        artifacts: artifactListEntries,
         ...artifactNamedEntries,
+        artifacts: artifactListEntries,
+        workflowRun: workflowRunEntry,
     });
     core.info(`Writing template to ${templateOutput}`);
     fs.writeFileSync(templateOutput, rendered, 'utf-8');
@@ -73,7 +93,6 @@ const run = async (context, github, templateInput, templateOutput) => {
         return core.setFailed(`Can only set one of ${templateInput.names}`);
     if (templateInput.type === 'None')
         return core.setFailed('Template source not specified.');
-    core.info(JSON.stringify(github_1.context.payload));
     return (0, codec_2.decode)(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
         Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, templateInput, templateOutput)),
