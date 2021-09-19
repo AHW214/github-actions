@@ -58,12 +58,12 @@ const run = async (context, github, templateInput, templateOutput) => {
         author: headCommit.author.name,
         message: headCommit.message,
     };
-    const formatUpdatedAt = (mask) => (0, dateformat_1.default)(updatedAt, `$UTC:${mask}`);
+    const formatUpdatedAt = (mask) => (0, dateformat_1.default)(updatedAt, `UTC:${mask}`);
     const updatedAtEntry = {
-        dateIso: formatUpdatedAt('isoDate'),
-        dateMed: formatUpdatedAt('mediumDate'),
-        timeIso: formatUpdatedAt('isoTime'),
-        timeShort: formatUpdatedAt('shortTime'),
+        dateIso: formatUpdatedAt('yyyy-mm-dd'),
+        dateMed: formatUpdatedAt('mmm d, yyyy'),
+        timeIso: formatUpdatedAt('HH:MM:ss'),
+        timeShort: formatUpdatedAt('h:MM TT'),
     };
     const workflowRunEntry = {
         headBranch,
