@@ -111,7 +111,7 @@ const run = async (
   };
 
   const formatUpdatedAt = (mask: string): string =>
-    dateformat(updatedAt, `$UTC:${mask}`);
+    dateformat(updatedAt, `UTC:${mask}`);
 
   const updatedAtEntry: UpdatedAtEntry = {
     dateIso: formatUpdatedAt('yyyy-mm-dd'),
