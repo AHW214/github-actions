@@ -3,7 +3,7 @@ import { context as globalContext } from '@actions/github';
 import { Just, Maybe, Nothing } from 'purify-ts';
 import { array } from 'purify-ts';
 
-import type { Payload } from 'action/prune-artifacts/codec';
+import { isDeletePayload, Payload } from 'action/prune-artifacts/codec';
 import { decode } from 'action/prune-artifacts/codec';
 import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
@@ -49,12 +49,16 @@ const run = async (
 ): Promise<void> => {
   const {
     repo: { owner, repo },
-    payload: { ref, ref_type },
+    payload,
   } = context;
 
-  if (ref_type !== 'branch') {
+  if (isDeletePayload(payload) && payload.ref_type !== 'branch') {
     return core.info('Ref not a branch, exiting...');
   }
+
+  const ref = isDeletePayload(payload)
+    ? payload.ref
+    : payload.workflow_run.head_branch;
 
   core.info(`Pruning artifacts generated for branch ${ref}`);
 
@@ -155,8 +159,6 @@ const run = async (
 
 attempt(() => {
   const input = core.getMultilineInput('exclude-workflow-runs');
-
-  core.info(JSON.stringify(globalContext.payload));
 
   array(numericString)
     .decode(input)

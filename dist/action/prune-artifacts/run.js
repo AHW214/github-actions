@@ -48,10 +48,13 @@ const findPostArtifactComments = (comments, removedArtifacts) => {
         : purify_ts_1.Nothing), comments);
 };
 const run = async (context, github, excludeWorkflowRuns) => {
-    const { repo: { owner, repo }, payload: { ref, ref_type }, } = context;
-    if (ref_type !== 'branch') {
+    const { repo: { owner, repo }, payload, } = context;
+    if ((0, codec_1.isDeletePayload)(payload) && payload.ref_type !== 'branch') {
         return core.info('Ref not a branch, exiting...');
     }
+    const ref = (0, codec_1.isDeletePayload)(payload)
+        ? payload.ref
+        : payload.workflow_run.head_branch;
     core.info(`Pruning artifacts generated for branch ${ref}`);
     const { data: { workflow_runs: workflowRuns }, } = await github.rest.actions.listWorkflowRunsForRepo({
         owner,
@@ -117,7 +120,6 @@ const run = async (context, github, excludeWorkflowRuns) => {
 };
 (0, run_1.attempt)(() => {
     const input = core.getMultilineInput('exclude-workflow-runs');
-    core.info(JSON.stringify(github_1.context.payload));
     (0, purify_ts_2.array)(codec_3.numericString)
         .decode(input)
         .caseOf({
