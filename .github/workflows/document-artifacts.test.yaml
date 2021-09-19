@@ -17,8 +17,8 @@ jobs:
           output-path: ./test/document-artifacts/output.md
           template-path: ./test/document-artifacts/template.mustache
       - run: |
-          git config --global user.name "AHW214"
-          git config --global user.email "AHW214@users.noreply.github.com"
-          git add "./test/document-artifacts/output.md"
-          git commit -m "[TEST] Push artifacts document."
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add './test/document-artifacts/output.md'
+          git commit -m '[TEST] Push artifacts document.'
           git push
