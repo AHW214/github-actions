@@ -6,6 +6,11 @@ inputs:
     required: true
     description: >
       [String] Token for communicating with the GitHub API.
+  exclude-workflow-runs:
+    required: false
+    description: >
+      [List String / Multiline] IDs of workflow runs whose artifacts shouldn't
+      be deleted.
   debug:
     required: false
     default: false

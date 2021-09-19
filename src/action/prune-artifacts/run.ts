@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import { Just, Maybe, Nothing } from 'purify-ts';
+import { array, number } from 'purify-ts';
 
 import type { Payload } from 'action/prune-artifacts/codec';
 import { decode } from 'action/prune-artifacts/codec';
@@ -9,20 +10,33 @@ import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
-import { flatten } from 'util/array';
+import { flatten, partition } from 'util/array';
+import { WorkflowRunArtifact } from 'data/artifact';
 
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 
 const findPostArtifactComments = (
   comments: Array<IssueComment>,
+  removedArtifacts: Array<WorkflowRunArtifact>,
 ): Array<IssueComment> => {
   const regexTag = new RegExp(COMMENT_TAG);
 
+  const hasCommentTag = (body: string) => regexTag.test(body);
+
+  // TODO - what if only some removed
+  const includesRemovedArtifact = (body: string) =>
+    // TODO - meh
+    removedArtifacts.some((art) => body.includes(String(art.id)));
+
   return Maybe.mapMaybe(
     (comment) =>
-      authorIsBot(comment) && comment.body && regexTag.test(comment.body)
-        ? Just(comment)
-        : Nothing,
+      Maybe.fromNullable(comment.body).chain((body) =>
+        authorIsBot(comment) &&
+        hasCommentTag(body) &&
+        includesRemovedArtifact(body)
+          ? Just(comment)
+          : Nothing,
+      ),
     comments,
   );
 };
@@ -30,6 +44,7 @@ const findPostArtifactComments = (
 const run = async (
   context: Context<Payload>,
   github: GithubClient,
+  excludeWorkflowRuns: Array<number>,
 ): Promise<void> => {
   const {
     repo: { owner, repo },
@@ -53,14 +68,24 @@ const run = async (
 
   core.info(`Found ${workflowRuns.length} workflow runs for branch ${ref}`);
 
+  const [excludeRuns, includeRuns] = partition(
+    (run) => excludeWorkflowRuns.includes(run.id),
+    workflowRuns,
+  );
+
+  if (excludeRuns.length > 0) {
+    const excludeIds = excludeRuns.map((run) => run.id);
+    core.info(`Excluding workflow runs with IDs: [${excludeIds}]`);
+  }
+
   const artifactsNested = await Promise.all(
-    workflowRuns.map(async ({ id }) => {
+    includeRuns.map(async (run) => {
       const {
         data: { artifacts },
       } = await github.rest.actions.listWorkflowRunArtifacts({
         owner,
         repo,
-        run_id: id,
+        run_id: run.id,
         per_page: 100,
       });
 
@@ -68,11 +93,13 @@ const run = async (
     }),
   );
 
-  const artifacts = flatten(artifactsNested);
+  const artifactsToRemove = flatten(artifactsNested);
 
-  core.info(`Found ${artifacts.length} artifacts for all workflow runs`);
+  core.info(
+    `Found ${artifactsToRemove.length} artifacts to remove for all included workflow runs`,
+  );
 
-  for (const art of artifacts) {
+  for (const art of artifactsToRemove) {
     core.info(`Deleting artifact ${art.id}`);
     await github.rest.actions.deleteArtifact({
       owner,
@@ -103,7 +130,10 @@ const run = async (
   );
 
   const comments = flatten(commentsNested);
-  const postArtifactComments = findPostArtifactComments(comments);
+  const postArtifactComments = findPostArtifactComments(
+    comments,
+    artifactsToRemove,
+  );
 
   for (const comment of postArtifactComments) {
     core.info(`Updating outdated artifact post comment ${comment.id}`);
@@ -123,8 +153,21 @@ const run = async (
 };
 
 attempt(() => {
-  return decode(globalContext).caseOf({
-    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-    Right: (context) => withGithubClient((github) => run(context, github)),
-  });
+  const input = core.getMultilineInput('exclude-workflow-runs');
+
+  array(number)
+    .decode(input)
+    .caseOf({
+      Left: (err) =>
+        core.setFailed(`Failed to parse input 'exclude-workflow-runs': ${err}`),
+      Right: (excludeWorkflowRuns) =>
+        decode(globalContext).caseOf({
+          Left: (err) =>
+            core.setFailed(`Failed to decode action context: ${err}`),
+          Right: (context) =>
+            withGithubClient((github) =>
+              run(context, github, excludeWorkflowRuns),
+            ),
+        }),
+    });
 });
