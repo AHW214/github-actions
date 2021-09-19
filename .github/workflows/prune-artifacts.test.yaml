@@ -21,8 +21,7 @@ jobs:
   test-prune-artifacts-push:
     if: |
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.ref_type == 'branch'
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
