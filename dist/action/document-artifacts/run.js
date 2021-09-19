@@ -26,6 +26,7 @@ const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
 const fs = __importStar(require("fs"));
 const mustache_1 = __importDefault(require("mustache"));
+const pretty_bytes_1 = __importDefault(require("pretty-bytes"));
 const codec_1 = require("./codec");
 const codec_2 = require("./codec");
 const run_1 = require("../../control/run");
@@ -34,12 +35,10 @@ const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const github_client_2 = require("../../data/github-client");
 const mkArtifactUrl = (owner, repo, checkSuiteId, artifactId) => `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${artifactId}`;
-const mkArtifactEntry = (owner, repo, checkSuiteId, { name, id }) => ({
-    [name]: mkArtifactUrl(owner, repo, checkSuiteId, id),
-});
-const mkArtifactListEntry = (owner, repo, checkSuiteId, { name, id }) => ({
-    name,
-    url: mkArtifactUrl(owner, repo, checkSuiteId, id),
+const mkArtifactEntry = (owner, repo, checkSuiteId, artifact) => ({
+    name: artifact.name,
+    size: (0, pretty_bytes_1.default)(artifact.size_in_bytes),
+    url: mkArtifactUrl(owner, repo, checkSuiteId, artifact.id),
 });
 const run = async (context, github, templateInput, templateOutput) => {
     const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId }, }, } = context;
@@ -54,14 +53,15 @@ const run = async (context, github, templateInput, templateOutput) => {
     if (artifacts.length <= 0) {
         return core.info('No artifacts to document, exiting...');
     }
-    const artifactEntries = artifacts.reduce((acc, art) => {
-        const entry = mkArtifactEntry(owner, repo, checkSuiteId, art);
-        return { ...acc, ...entry };
-    }, {});
-    const artifactListEntries = artifacts.map((art) => mkArtifactListEntry(owner, repo, checkSuiteId, art));
+    const [artifactNamedEntries, artifactListEntries] = artifacts.reduce(([namedEntries, listEntries], artifact) => {
+        const entry = mkArtifactEntry(owner, repo, checkSuiteId, artifact);
+        const namedEntry = { [entry.name]: entry };
+        const listEntry = { artifact: entry };
+        return [{ ...namedEntries, ...namedEntry }, [...listEntries, listEntry]];
+    }, [{}, []]);
     const rendered = mustache_1.default.render(template, {
         artifacts: artifactListEntries,
-        ...artifactEntries,
+        ...artifactNamedEntries,
     });
     core.info(`Writing template to ${templateOutput}`);
     fs.writeFileSync(templateOutput, rendered, 'utf-8');

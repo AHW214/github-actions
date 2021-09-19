@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import { context as globalContext } from '@actions/github';
 import * as fs from 'fs';
 import mustache from 'mustache';
+import prettyBytes from 'pretty-bytes';
 
 import type { Payload } from 'action/document-artifacts/codec';
 import { decode } from 'action/document-artifacts/codec';
@@ -13,13 +14,18 @@ import { getInputOneOf } from 'data/github-client';
 
 type TemplateInput = { name: 'template-text' | 'template-path'; value: string };
 
-type ArtifactEntries = {
-  [name: string]: string;
+type ArtifactEntry = {
+  name: string;
+  size: string;
+  url: string;
+};
+
+type ArtifactNamedEntries = {
+  [name: string]: ArtifactEntry;
 };
 
 type ArtifactListEntry = {
-  name: string;
-  url: string;
+  artifact: ArtifactEntry;
 };
 
 const mkArtifactUrl = (
@@ -34,19 +40,11 @@ const mkArtifactEntry = (
   owner: string,
   repo: string,
   checkSuiteId: number,
-  { name, id }: WorkflowRunArtifact,
-): ArtifactEntries => ({
-  [name]: mkArtifactUrl(owner, repo, checkSuiteId, id),
-});
-
-const mkArtifactListEntry = (
-  owner: string,
-  repo: string,
-  checkSuiteId: number,
-  { name, id }: WorkflowRunArtifact,
-): ArtifactListEntry => ({
-  name,
-  url: mkArtifactUrl(owner, repo, checkSuiteId, id),
+  artifact: WorkflowRunArtifact,
+): ArtifactEntry => ({
+  name: artifact.name,
+  size: prettyBytes(artifact.size_in_bytes),
+  url: mkArtifactUrl(owner, repo, checkSuiteId, artifact.id),
 });
 
 const run = async (
@@ -79,18 +77,23 @@ const run = async (
     return core.info('No artifacts to document, exiting...');
   }
 
-  const artifactEntries = artifacts.reduce<ArtifactEntries>((acc, art) => {
-    const entry = mkArtifactEntry(owner, repo, checkSuiteId, art);
-    return { ...acc, ...entry };
-  }, {});
+  const [artifactNamedEntries, artifactListEntries] = artifacts.reduce<
+    [ArtifactNamedEntries, Array<ArtifactListEntry>]
+  >(
+    ([namedEntries, listEntries], artifact) => {
+      const entry = mkArtifactEntry(owner, repo, checkSuiteId, artifact);
 
-  const artifactListEntries = artifacts.map((art) =>
-    mkArtifactListEntry(owner, repo, checkSuiteId, art),
+      const namedEntry = { [entry.name]: entry };
+      const listEntry = { artifact: entry };
+
+      return [{ ...namedEntries, ...namedEntry }, [...listEntries, listEntry]];
+    },
+    [{}, []],
   );
 
   const rendered = mustache.render(template, {
     artifacts: artifactListEntries,
-    ...artifactEntries,
+    ...artifactNamedEntries,
   });
 
   core.info(`Writing template to ${templateOutput}`);
