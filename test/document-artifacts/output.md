@@ -1,16 +1,29 @@
-Artifacts made on Sep 19, 2021, at
-10:45 AM UTC.
+Artifacts made on Sep 20, 2021, at
+6:17 AM UTC.
 
 Commit info:
-- Author: Adam Weider
-- Message: Test test.
-- SHA: 2c30108f4dbf46e8286f4ccadbfdcccaadd798a4
-- Head branch: main
+- Author: dependabot[bot]
+- Message: Bump @types&#x2F;node from 16.9.1 to 16.9.4
+
+Bumps [@types&#x2F;node](https:&#x2F;&#x2F;github.com&#x2F;DefinitelyTyped&#x2F;DefinitelyTyped&#x2F;tree&#x2F;HEAD&#x2F;types&#x2F;node) from 16.9.1 to 16.9.4.
+- [Release notes](https:&#x2F;&#x2F;github.com&#x2F;DefinitelyTyped&#x2F;DefinitelyTyped&#x2F;releases)
+- [Commits](https:&#x2F;&#x2F;github.com&#x2F;DefinitelyTyped&#x2F;DefinitelyTyped&#x2F;commits&#x2F;HEAD&#x2F;types&#x2F;node)
+
+---
+updated-dependencies:
+- dependency-name: &quot;@types&#x2F;node&quot;
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+- SHA: 23c59e9907bb9caa222660887a58a18b72ceb379
+- Head branch: dependabot&#x2F;npm_and_yarn&#x2F;types&#x2F;node-16.9.4
 
 Here are your artifacts:
-- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3809587645&#x2F;artifacts&#x2F;94147664)
-- [**artifact-2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3809587645&#x2F;artifacts&#x2F;94147665)
+- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3813641181&#x2F;artifacts&#x2F;94279338)
+- [**artifact-2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3813641181&#x2F;artifacts&#x2F;94279339)
 
 Here they are again:
-- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3809587645&#x2F;artifacts&#x2F;94147664)
-- [**Artifact 2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3809587645&#x2F;artifacts&#x2F;94147665)
+- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3813641181&#x2F;artifacts&#x2F;94279338)
+- [**Artifact 2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3813641181&#x2F;artifacts&#x2F;94279339)
