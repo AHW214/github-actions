@@ -1,15 +1,16 @@
 Artifacts made on Sep 21, 2021, at
-6:59 AM UTC.
+7:07 AM UTC.
 
 Commit info:
 - Author: Adam Weider
-- Message: Test
-- SHA: 06b44098e14551250a17acf217eff9cc0bd6a7dc
-- Head branch: test-default-branch-condition
+- Message: Test print values.
+- SHA: 3494cb7a52b0a3761621184def5dc2e48c48bc4e
+- Head branch: main
 
 Here are your artifacts:
-- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825252769&#x2F;artifacts&#x2F;94692400)
+- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825316937&#x2F;artifacts&#x2F;94694198)
+- [**artifact-2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825316937&#x2F;artifacts&#x2F;94694199)
 
 Here they are again:
-- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825252769&#x2F;artifacts&#x2F;94692400)
-- [**Artifact 2** (zip) ()]()
+- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825316937&#x2F;artifacts&#x2F;94694198)
+- [**Artifact 2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825316937&#x2F;artifacts&#x2F;94694199)
