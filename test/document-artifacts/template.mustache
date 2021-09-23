@@ -7,6 +7,12 @@ Commit info:
 - SHA: {{ workflowRun.headSha }}
 - Head branch: {{ workflowRun.headBranch }}
 
+Another section: {{ info.name }}
+- Workflow run: {{ info.runName }}
+- Updated at: {{ info.updatedAt }}
+
+And a message: "{{ cool.message }}"
+
 Here are your artifacts:
 {{# artifacts }}
 - [**{{ artifact.name }}** (zip) ({{ artifact.size }})]({{ artifact.url }})

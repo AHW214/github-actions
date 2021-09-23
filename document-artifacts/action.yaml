@@ -18,6 +18,10 @@ inputs:
     required: false
     description: >
       [String] Text of the template in which to document artifacts.
+  template-variables:
+    required: false
+    description: >
+      [YAML] Custom variables to include when rendering the template.
   debug:
     required: false
     default: false

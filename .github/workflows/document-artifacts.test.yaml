@@ -18,6 +18,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: ./test/document-artifacts/output.md
           template-path: ./test/document-artifacts/template.mustache
+          template-variables: |
+            info:
+              name: l'informazione
+              runName: ${{ github.event.workflow_run.name }}
+              updatedAt: ${{ github.event.workflow_run.updated_at }}
+            cool:
+              message: fammi sapere se puoi capire questo
       - run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
