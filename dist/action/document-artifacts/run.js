@@ -82,7 +82,7 @@ const run = async (context, github, templateInput, templateOutput, templateVaria
     }, [{}, []]);
     const variablesEntries = templateVariables
         .chain((vars) => (0, yaml_1.parseObject)(vars)
-        .ifLeft((err) => core.warning(`Could not parse template variables: ${err.message}`))
+        .ifLeft((err) => core.warning(`Could not parse template variables: ${err}`))
         .toMaybe())
         .orDefault({});
     const rendered = mustache_1.default.render(template, {

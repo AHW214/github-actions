@@ -154,7 +154,7 @@ const run = async (
     .chain((vars) =>
       parseObject(vars)
         .ifLeft((err) =>
-          core.warning(`Could not parse template variables: ${err.message}`),
+          core.warning(`Could not parse template variables: ${err}`),
         )
         .toMaybe(),
     )
