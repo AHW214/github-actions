@@ -16,7 +16,7 @@ const isDeletePayload = (payload: Payload): payload is DeletePayload =>
 
 const DeletePayload = Codec.interface({
   ref: string,
-  ref_type: string,
+  ref_type: exactly('branch'),
 });
 
 const WorkflowRun = Codec.interface({

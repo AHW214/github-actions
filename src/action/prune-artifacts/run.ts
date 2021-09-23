@@ -14,6 +14,7 @@ import type { GithubClient } from 'data/github-client';
 import { flatten, partition } from 'util/array';
 import { numericString } from 'util/codec';
 
+// TODO - export from shared actions module
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 
 const findPostArtifactComments = (
@@ -51,10 +52,6 @@ const run = async (
     repo: { owner, repo },
     payload,
   } = context;
-
-  if (isDeletePayload(payload) && payload.ref_type !== 'branch') {
-    return core.info('Ref not a branch, exiting...');
-  }
 
   const ref = isDeletePayload(payload)
     ? payload.ref
