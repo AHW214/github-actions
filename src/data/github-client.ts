@@ -1,4 +1,4 @@
-export { GithubClient, getInputOneOf, getInputMaybe };
+export { GithubClient, getInputMaybe, getInputOneOf, getInputRequired };
 
 import { InputOptions, getInput } from '@actions/core';
 import type { GitHub } from '@actions/github/lib/utils';
@@ -11,8 +11,11 @@ type OneOfResult<T extends string> =
   | { type: 'Many'; names: [string, string, ...string[]] }
   | { type: 'One'; name: T; value: string };
 
+const getInputRequired = (name: string, options?: InputOptions): string =>
+  getInput(name, { ...options, required: true });
+
 const getInputMaybe = (name: string, options?: InputOptions): Maybe<string> =>
-  Maybe.encase(() => getInput(name, { ...options, required: true }));
+  Maybe.encase(() => getInputRequired(name, options));
 
 const getInputOneOf = <T extends Array<string>>(
   ...names: T

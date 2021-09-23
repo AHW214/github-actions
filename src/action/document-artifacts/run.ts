@@ -4,6 +4,7 @@ import dateformat from 'dateformat';
 import * as fs from 'fs';
 import mustache from 'mustache';
 import prettyBytes from 'pretty-bytes';
+import type { Maybe } from 'purify-ts';
 
 import type { Payload } from 'action/document-artifacts/codec';
 import { decode } from 'action/document-artifacts/codec';
@@ -11,7 +12,12 @@ import { attempt, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
-import { getInputOneOf } from 'data/github-client';
+import {
+  getInputMaybe,
+  getInputOneOf,
+  getInputRequired,
+} from 'data/github-client';
+import { parseObject } from 'data/yaml';
 
 type TemplateInput = { name: 'template-text' | 'template-path'; value: string };
 
@@ -73,6 +79,7 @@ const run = async (
   github: GithubClient,
   templateInput: TemplateInput,
   templateOutput: string,
+  templateVariables: Maybe<string>,
 ): Promise<void> => {
   const {
     repo: { owner, repo },
@@ -107,6 +114,7 @@ const run = async (
 
   const commitEntry: CommitEntry = {
     author: headCommit.author.name,
+    // TODO - Truncate if Long
     message: headCommit.message,
   };
 
@@ -142,7 +150,18 @@ const run = async (
     [{}, []],
   );
 
+  const variablesEntries = templateVariables
+    .chain((vars) =>
+      parseObject(vars)
+        .ifLeft((err) =>
+          core.warning(`Could not parse template variables: ${err.message}`),
+        )
+        .toMaybe(),
+    )
+    .orDefault({});
+
   const rendered = mustache.render(template, {
+    ...variablesEntries,
     ...artifactNamedEntries,
     artifacts: artifactListEntries,
     workflowRun: workflowRunEntry,
@@ -154,8 +173,9 @@ const run = async (
 };
 
 attempt(() => {
-  const templateOutput = core.getInput('output-path');
+  const templateOutput = getInputRequired('output-path');
   const templateInput = getInputOneOf('template-text', 'template-path');
+  const templateVariables = getInputMaybe('template-variables');
 
   if (templateInput.type === 'Many')
     return core.setFailed(`Can only set one of ${templateInput.names}`);
@@ -167,7 +187,7 @@ attempt(() => {
     Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
     Right: (context) =>
       withGithubClient((github) =>
-        run(context, github, templateInput, templateOutput),
+        run(context, github, templateInput, templateOutput, templateVariables),
       ),
   });
 });
