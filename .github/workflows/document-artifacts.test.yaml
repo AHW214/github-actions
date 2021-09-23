@@ -19,7 +19,8 @@ jobs:
           output-path: ./test/document-artifacts/output.md
           template-path: ./test/document-artifacts/template.mustache
           template-variables: |
-            workflow_run: ${{ github.event.workflow_run }}
+            workflow_run:
+                ${{ toJSON(github.event.workflow_run) }}
       - run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
