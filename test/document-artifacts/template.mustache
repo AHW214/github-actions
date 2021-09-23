@@ -1,7 +1,7 @@
 Artifacts generated at {{ workflow_run.updated_at }}
 
 Commit info:
-- Author: {{ workflow_run.head_commit.author }}
+- Author: {{ workflow_run.head_commit.author.name }}
 - Message: {{ workflow_run.head_commit.message }}
 - SHA: {{ workflow_run.head_sha }}
 - Head branch: {{ workflow_run.head_branch }}
