@@ -8,7 +8,7 @@ const isDeletePayload = (payload) => 'ref' in payload;
 exports.isDeletePayload = isDeletePayload;
 const DeletePayload = purify_ts_1.Codec.interface({
     ref: purify_ts_1.string,
-    ref_type: purify_ts_1.string,
+    ref_type: (0, purify_ts_1.exactly)('branch'),
 });
 const WorkflowRun = purify_ts_1.Codec.interface({
     event: (0, purify_ts_1.exactly)('push'),

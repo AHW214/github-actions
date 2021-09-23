@@ -35,13 +35,14 @@ const artifact_1 = require("../../data/artifact");
 const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const github_client_2 = require("../../data/github-client");
+const yaml_1 = require("../../data/yaml");
 const mkArtifactUrl = (owner, repo, checkSuiteId, artifactId) => `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${artifactId}`;
 const mkArtifactEntry = (owner, repo, checkSuiteId, artifact) => ({
     name: artifact.name,
     size: (0, pretty_bytes_1.default)(artifact.size_in_bytes),
     url: mkArtifactUrl(owner, repo, checkSuiteId, artifact.id),
 });
-const run = async (context, github, templateInput, templateOutput) => {
+const run = async (context, github, templateInput, templateOutput, templateVariables) => {
     const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId, head_branch: headBranch, head_commit: headCommit, head_sha: headSha, updated_at: updatedAt, }, }, } = context;
     const template = templateInput.name === 'template-path'
         ? fs.readFileSync(templateInput.value, 'utf-8')
@@ -56,6 +57,7 @@ const run = async (context, github, templateInput, templateOutput) => {
     }
     const commitEntry = {
         author: headCommit.author.name,
+        // TODO - Truncate if Long
         message: headCommit.message,
     };
     const formatUpdatedAt = (mask) => (0, dateformat_1.default)(updatedAt, `UTC:${mask}`);
@@ -78,7 +80,13 @@ const run = async (context, github, templateInput, templateOutput) => {
         const listEntry = { artifact: entry };
         return [{ ...namedEntries, ...namedEntry }, [...listEntries, listEntry]];
     }, [{}, []]);
+    const variablesEntries = templateVariables
+        .chain((vars) => (0, yaml_1.parseObject)(vars)
+        .ifLeft((err) => core.warning(`Could not parse template variables: ${err.message}`))
+        .toMaybe())
+        .orDefault({});
     const rendered = mustache_1.default.render(template, {
+        ...variablesEntries,
         ...artifactNamedEntries,
         artifacts: artifactListEntries,
         workflowRun: workflowRunEntry,
@@ -87,15 +95,16 @@ const run = async (context, github, templateInput, templateOutput) => {
     fs.writeFileSync(templateOutput, rendered, 'utf-8');
 };
 (0, run_1.attempt)(() => {
-    const templateOutput = core.getInput('output-path');
+    const templateOutput = (0, github_client_2.getInputRequired)('output-path');
     const templateInput = (0, github_client_2.getInputOneOf)('template-text', 'template-path');
+    const templateVariables = (0, github_client_2.getInputMaybe)('template-variables');
     if (templateInput.type === 'Many')
         return core.setFailed(`Can only set one of ${templateInput.names}`);
     if (templateInput.type === 'None')
         return core.setFailed('Template source not specified.');
     return (0, codec_2.decode)(github_1.context).caseOf({
         Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-        Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, templateInput, templateOutput)),
+        Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, templateInput, templateOutput, templateVariables)),
     });
 });
 //# sourceMappingURL=run.js.map

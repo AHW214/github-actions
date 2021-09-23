@@ -33,6 +33,7 @@ const context_1 = require("../../data/context");
 const github_client_1 = require("../../data/github-client");
 const array_1 = require("../../util/array");
 const codec_3 = require("../../util/codec");
+// TODO - export from shared actions module
 const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
 const findPostArtifactComments = (comments, removedArtifacts) => {
     const regexTag = new RegExp(COMMENT_TAG);
@@ -49,9 +50,6 @@ const findPostArtifactComments = (comments, removedArtifacts) => {
 };
 const run = async (context, github, excludeWorkflowRuns) => {
     const { repo: { owner, repo }, payload, } = context;
-    if ((0, codec_1.isDeletePayload)(payload) && payload.ref_type !== 'branch') {
-        return core.info('Ref not a branch, exiting...');
-    }
     const ref = (0, codec_1.isDeletePayload)(payload)
         ? payload.ref
         : payload.workflow_run.head_branch;
