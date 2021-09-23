@@ -1,16 +1,22 @@
-Artifacts made on Sep 21, 2021, at
-7:23 AM UTC.
+Artifacts made on Sep 23, 2021, at
+9:32 AM UTC.
 
 Commit info:
 - Author: Adam Weider
-- Message: Remove test print.
-- SHA: 432dbbae539246620a948145d04822bd3273239f
+- Message: Template variables test.
+- SHA: 95c5d027d7cb604cba928e0debb9d0620f052ac4
 - Head branch: main
 
+Another section: l&#39;informazione
+- Workflow run: Generate Artifacts
+- Updated at: 2021-09-23T09:32:09Z
+
+And a message: "fammi sapere se puoi capire questo"
+
 Here are your artifacts:
-- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825440386&#x2F;artifacts&#x2F;94698002)
-- [**artifact-2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825440386&#x2F;artifacts&#x2F;94698003)
+- [**artifact-1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3850974147&#x2F;artifacts&#x2F;95565768)
+- [**artifact-2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3850974147&#x2F;artifacts&#x2F;95565769)
 
 Here they are again:
-- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825440386&#x2F;artifacts&#x2F;94698002)
-- [**Artifact 2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3825440386&#x2F;artifacts&#x2F;94698003)
+- [**Artifact 1** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3850974147&#x2F;artifacts&#x2F;95565768)
+- [**Artifact 2** (zip) (14 B)](https:&#x2F;&#x2F;github.com&#x2F;AHW214&#x2F;github-actions&#x2F;suites&#x2F;3850974147&#x2F;artifacts&#x2F;95565769)
