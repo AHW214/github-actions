@@ -20,7 +20,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: artifact-1
+          name: artifact_1
           path: artifact_1.txt
 
   generate-artifact-2:
@@ -36,5 +36,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: artifact-2
+          name: artifact_2
           path: artifact_2.txt
