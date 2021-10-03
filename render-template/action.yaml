@@ -1,0 +1,32 @@
+name: Render Template
+description: >
+  Render a mustache template with given variables.
+author: AHW214
+inputs:
+  output-name:
+    required: false
+    description: >
+      [String] Name of the action output to store the rendered template. If not
+      given, then `output-path` must be specified instead.
+  output-path:
+    required: false
+    description: >
+      [String] Path at which to output the rendered template. If not given, then
+      `output-name` must be specified instead.
+  template-path:
+    required: false
+    description: >
+      [String] Path of the template to be rendered. If not given, then
+      `template-text` must be specified instead.
+  template-text:
+    required: false
+    description: >
+      [String] Text of the template to be rendered. If not given, then
+      `template-path` must be specified instead.
+  template-variables:
+    required: true
+    description: >
+      [YAML] Variables to include in the rendered template.
+runs:
+  using: 'node12'
+  main: '../dist/action/render-template/run.js'
