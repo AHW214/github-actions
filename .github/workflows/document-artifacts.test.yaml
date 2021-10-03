@@ -1,29 +1,38 @@
-# name: 'Test: Document Artifacts Action'
+name: 'Test: Document Artifacts'
 
-# on:
-#   workflow_run:
-#     workflows: ['Generate Artifacts']
-#     types: [completed]
+on:
+  workflow_run:
+    workflows:
+      - Generate Artifacts
+    types:
+      - completed
 
-# jobs:
-#   test-document-artifacts:
-#     if: github.event.workflow_run.conclusion == 'success'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#         with:
-#           ref: ${{ github.event.workflow_run.head_branch }}
-#       - uses: ./document-artifacts
-#         with:
-#           github-token: ${{ secrets.GITHUB_TOKEN }}
-#           output-path: ./test/document-artifacts/output.md
-#           template-path: ./test/document-artifacts/template.mustache
-#           template-variables: |
-#             workflow_run:
-#                 ${{ toJSON(github.event.workflow_run) }}
-#       - run: |
-#           git config --global user.name 'github-actions[bot]'
-#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#           git add './test/document-artifacts/output.md'
-#           git commit -m '[TEST] Push artifacts document.'
-#           git push
+jobs:
+  test-document-artifacts:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - uses: ./actions/get-artifact-info
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        id: artifact-info
+      - uses: ./actions/render-template
+        with:
+          output-path: ./test/document-artifacts/output.md
+          template-path: ./test/document-artifacts/template.mustache
+          template-variables: |
+            workflow_run:
+              ${{ toJSON(github.event.workflow_run) }}
+            artifact_array:
+              ${{ steps.artifact-info.outputs.artifact-info-array }}
+            artifact_object:
+              ${{ steps.artifact-info.outputs.artifact-info-object }}
+      - run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add './test/document-artifacts/output.md'
+          git commit -m '[TEST] Push artifacts document.'
+          git push

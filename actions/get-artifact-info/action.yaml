@@ -23,4 +23,4 @@ outputs:
       [ { name: string, size: string, url: string } ].
 runs:
   using: 'node12'
-  main: '../dist/action/get-artifact-info/run.js'
+  main: '../../dist/action/get-artifact-info/run.js'

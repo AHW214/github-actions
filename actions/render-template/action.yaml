@@ -29,4 +29,4 @@ inputs:
       [YAML] Variables to include in the rendered template.
 runs:
   using: 'node12'
-  main: '../dist/action/render-template/run.js'
+  main: '../../dist/action/render-template/run.js'

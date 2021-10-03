@@ -18,4 +18,4 @@ inputs:
       [Bool] Whether to log GitHub API calls in the action output.
 runs:
   using: 'node12'
-  main: '../dist/action/prune-artifacts/run.js'
+  main: '../../dist/action/prune-artifacts/run.js'

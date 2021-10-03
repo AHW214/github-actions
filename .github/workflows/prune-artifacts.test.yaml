@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./prune-artifacts
+      - uses: ./actions/prune-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./prune-artifacts
+      - uses: ./actions/prune-artifacts
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           exclude-workflow-runs: |
