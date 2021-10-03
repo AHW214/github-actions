@@ -1,15 +1,14 @@
 import * as core from '@actions/core';
-import { context as globalContext } from '@actions/github';
 import mustache from 'mustache';
 import { Just, Maybe, Nothing } from 'purify-ts';
 
-import type { Payload } from 'action/post-artifacts/codec';
-import { decode } from 'action/post-artifacts/codec';
-import { attempt, withGithubClient } from 'control/run';
+import { Context } from 'action/post-artifacts/context';
+import { COMMENT_TAG } from 'action/shared/tag';
+import { attempt, withContext, withGithubClient } from 'control/run';
 import type { WorkflowRunArtifact } from 'data/artifact';
+import { mkArtifactUrl } from 'data/artifact';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
-import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 import { getInputMaybe } from 'data/github-client';
 
@@ -18,10 +17,8 @@ type CommentInfo = {
   commentId: number;
 };
 
-const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
-
 const makeCommentBody = (
-  context: Context<Payload>,
+  context: Context,
   checkSuiteId: number,
   artifacts: Array<WorkflowRunArtifact>,
   commentHeader: Maybe<string>,
@@ -36,7 +33,7 @@ const makeCommentBody = (
 
   const body = artifacts.reduce((acc, art) => {
     const name = `${art.name}.zip`;
-    const link = `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${art.id}`;
+    const link = mkArtifactUrl(owner, repo, checkSuiteId, art.id);
     return `${acc}\n* [${name}](${link})`;
   }, '');
 
@@ -44,7 +41,7 @@ const makeCommentBody = (
 };
 
 const findOutdatedComments = async (
-  context: Context<Payload>,
+  context: Context,
   github: GithubClient,
   issueNumber: number,
 ): Promise<Array<CommentInfo>> => {
@@ -79,7 +76,7 @@ const findOutdatedComments = async (
 };
 
 const handleOutdatedArtifacts = async (
-  context: Context<Payload>,
+  context: Context,
   github: GithubClient,
   newComment: IssueComment,
   outdatedComments: Array<CommentInfo>,
@@ -100,8 +97,7 @@ const handleOutdatedArtifacts = async (
           artifact_id: artifactId,
         });
       } catch (err) {
-        // TODO
-        core.info('Probably already deleted');
+        core.warning(`Error deleting artifact: ${err}`);
       }
     }
 
@@ -130,7 +126,7 @@ const handleOutdatedArtifacts = async (
 };
 
 const postNewComment = async (
-  context: Context<Payload>,
+  context: Context,
   github: GithubClient,
   issueNumber: number,
   body: string,
@@ -152,7 +148,7 @@ const postNewComment = async (
 };
 
 const run = async (
-  context: Context<Payload>,
+  context: Context,
   github: GithubClient,
   commentHeader: Maybe<string>,
   outdatedCommentTemplate: Maybe<string>,
@@ -214,17 +210,15 @@ attempt(() => {
     'remove-outdated-artifacts',
   );
 
-  return decode(globalContext).caseOf({
-    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-    Right: (context) =>
-      withGithubClient((github) =>
-        run(
-          context,
-          github,
-          commentHeader,
-          outdatedCommentTemplate,
-          removeOutdatedArtifacts,
-        ),
+  return withContext(Context, (context) =>
+    withGithubClient((github) =>
+      run(
+        context,
+        github,
+        commentHeader,
+        outdatedCommentTemplate,
+        removeOutdatedArtifacts,
       ),
-  });
+    ),
+  );
 });

@@ -1,7 +1,8 @@
 export type { GithubClient };
 export { getInputMaybe, getInputOneOf, getInputRequired };
 
-import { InputOptions, getInput } from '@actions/core';
+import type { InputOptions } from '@actions/core';
+import { getInput } from '@actions/core';
 import type { GitHub } from '@actions/github/lib/utils';
 import { Maybe } from 'purify-ts';
 

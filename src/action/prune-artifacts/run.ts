@@ -1,62 +1,38 @@
 import * as core from '@actions/core';
-import { context as globalContext } from '@actions/github';
 import { Just, Maybe, Nothing } from 'purify-ts';
 import { array } from 'purify-ts';
 
-import { isDeletePayload, Payload } from 'action/prune-artifacts/codec';
-import { decode } from 'action/prune-artifacts/codec';
-import { attempt, withGithubClient } from 'control/run';
-import type { WorkflowRunArtifact } from 'data/artifact';
+import { Context } from 'action/prune-artifacts/codec';
+import { COMMENT_TAG } from 'action/shared/tag';
+import { attempt, withContext, withGithubClient } from 'control/run';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
-import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 import { flatten, partition } from 'util/array';
 import { numericString } from 'util/codec';
 
-// TODO - export from shared actions module
-const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
-
 const findPostArtifactComments = (
   comments: Array<IssueComment>,
-  removedArtifacts: Array<WorkflowRunArtifact>,
 ): Array<IssueComment> => {
   const regexTag = new RegExp(COMMENT_TAG);
-
   const hasCommentTag = (body: string) => regexTag.test(body);
-
-  // TODO - what if only some removed
-  const includesRemovedArtifact = (body: string) =>
-    // TODO - meh
-    removedArtifacts.some((art) => body.includes(String(art.id)));
 
   return Maybe.mapMaybe(
     (comment) =>
       Maybe.fromNullable(comment.body).chain((body) =>
-        authorIsBot(comment) &&
-        hasCommentTag(body) &&
-        includesRemovedArtifact(body)
-          ? Just(comment)
-          : Nothing,
+        authorIsBot(comment) && hasCommentTag(body) ? Just(comment) : Nothing,
       ),
     comments,
   );
 };
 
-const run = async (
-  context: Context<Payload>,
+const pruneArtifacts = async (
   github: GithubClient,
   excludeWorkflowRuns: Array<number>,
-): Promise<void> => {
-  const {
-    repo: { owner, repo },
-    payload,
-  } = context;
-
-  const ref = isDeletePayload(payload)
-    ? payload.ref
-    : payload.workflow_run.head_branch;
-
+  owner: string,
+  repo: string,
+  ref: string,
+) => {
   core.info(`Pruning artifacts generated for branch ${ref}`);
 
   const {
@@ -109,7 +85,14 @@ const run = async (
       artifact_id: art.id,
     });
   }
+};
 
+const updateArtifactComments = async (
+  github: GithubClient,
+  owner: string,
+  repo: string,
+  ref: string,
+) => {
   const { data: pullRequests } = await github.rest.pulls.list({
     owner,
     repo,
@@ -132,10 +115,7 @@ const run = async (
   );
 
   const comments = flatten(commentsNested);
-  const postArtifactComments = findPostArtifactComments(
-    comments,
-    artifactsToRemove,
-  );
+  const postArtifactComments = findPostArtifactComments(comments);
 
   for (const comment of postArtifactComments) {
     core.info(`Updating outdated artifact post comment ${comment.id}`);
@@ -154,6 +134,27 @@ const run = async (
   }
 };
 
+const run = async (
+  context: Context,
+  github: GithubClient,
+  excludeWorkflowRuns: Array<number>,
+): Promise<void> => {
+  const {
+    repo: { owner, repo },
+  } = context;
+
+  const ref =
+    context.eventName === 'workflow_run'
+      ? context.payload.workflow_run.head_branch
+      : context.payload.ref;
+
+  pruneArtifacts(github, excludeWorkflowRuns, owner, repo, ref);
+
+  if (context.eventName === 'delete') {
+    updateArtifactComments(github, owner, repo, ref);
+  }
+};
+
 attempt(() => {
   const input = core.getMultilineInput('exclude-workflow-runs');
 
@@ -162,14 +163,12 @@ attempt(() => {
     .caseOf({
       Left: (err) =>
         core.setFailed(`Failed to parse input 'exclude-workflow-runs': ${err}`),
+
       Right: (excludeWorkflowRuns) =>
-        decode(globalContext).caseOf({
-          Left: (err) =>
-            core.setFailed(`Failed to decode action context: ${err}`),
-          Right: (context) =>
-            withGithubClient((github) =>
-              run(context, github, excludeWorkflowRuns),
-            ),
-        }),
+        withContext(Context, (context) =>
+          withGithubClient((github) =>
+            run(context, github, excludeWorkflowRuns),
+          ),
+        ),
     });
 });

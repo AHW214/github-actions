@@ -1,12 +1,9 @@
 import * as core from '@actions/core';
-import { context as globalContext } from '@actions/github';
 
-import type { Payload } from 'action/get-artifact-info/codec';
-import { decode } from 'action/get-artifact-info/codec';
-import { attempt, withGithubClient } from 'control/run';
+import { Context } from 'action/get-artifact-info/context';
+import { attempt, withContext, withGithubClient } from 'control/run';
 import type { ArtifactInfo } from 'data/artifact';
 import { mkArtifactInfo } from 'data/artifact';
-import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 
 type ArtifactInfoArray = Array<{
@@ -17,10 +14,7 @@ type ArtifactInfoObject = {
   [name: string]: ArtifactInfo;
 };
 
-const run = async (
-  context: Context<Payload>,
-  github: GithubClient,
-): Promise<void> => {
+const run = async (context: Context, github: GithubClient): Promise<void> => {
   const {
     repo: { owner, repo },
     payload: {
@@ -61,8 +55,7 @@ const run = async (
 };
 
 attempt(() =>
-  decode(globalContext).caseOf({
-    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-    Right: (context) => withGithubClient((github) => run(context, github)),
-  }),
+  withContext(Context, (context) =>
+    withGithubClient((github) => run(context, github)),
+  ),
 );

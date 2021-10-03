@@ -1,5 +1,5 @@
 export type { ArtifactInfo, WorkflowRunArtifact };
-export { mkArtifactInfo };
+export { mkArtifactInfo, mkArtifactUrl };
 
 import prettyBytes from 'pretty-bytes';
 

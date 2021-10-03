@@ -1,8 +1,11 @@
-export { attempt, withGithubClient };
+export { attempt, withContext, withGithubClient };
 
 import * as core from '@actions/core';
-import { getOctokit } from '@actions/github';
+import { context as globalContext, getOctokit } from '@actions/github';
+import type { Codec } from 'purify-ts';
 
+import type { ContextOf } from 'data/context';
+import { decodeWith } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 
 const attempt = async <T>(
@@ -41,3 +44,16 @@ const withGithubClient = async <T>(
 
   return run(github);
 };
+
+const withContext = <T, U>(
+  Context: Codec<T>,
+  run: (context: ContextOf<T>) => Promise<U>,
+): Promise<U | undefined> =>
+  decodeWith(Context, globalContext).caseOf<Promise<U | undefined>>({
+    Left: async (err) => {
+      core.setFailed(`Failed to decode action context: ${err}`);
+      return undefined;
+    },
+
+    Right: (context) => run(context),
+  });

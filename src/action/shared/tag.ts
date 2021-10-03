@@ -1,0 +1,3 @@
+export { COMMENT_TAG };
+
+const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
