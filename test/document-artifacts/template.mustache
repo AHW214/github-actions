@@ -8,10 +8,10 @@ Commit info:
 - Lucky number: {{ workflow_run.run_number }}
 
 Here are your artifacts:
-{{# artifacts }}
+{{# artifact_array }}
 - [**{{ artifact.name }}** (zip) ({{ artifact.size }})]({{ artifact.url }})
-{{/ artifacts }}
+{{/ artifact_array }}
 
 Here they are again:
-- [**Artifact 1** (zip) ({{ artifact_1.size }})]({{ artifact_1.url }})
-- [**Artifact 2** (zip) ({{ artifact_2.size }})]({{ artifact_2.url }})
+- [**Artifact 1** (zip) ({{ artifact_object.artifact_1.size }})]({{ artifact_object.artifact_1.url }})
+- [**Artifact 2** (zip) ({{ artifact_object.artifact_2.size }})]({{ artifact_object.artifact_2.url }})
