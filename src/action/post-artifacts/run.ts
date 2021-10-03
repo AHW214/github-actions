@@ -9,8 +9,8 @@ import type { WorkflowRunArtifact } from 'data/artifact';
 import { mkArtifactUrl } from 'data/artifact';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
-import type { GithubClient } from 'data/github-client';
-import { getInputMaybe } from 'data/github-client';
+import type { GithubClient } from 'util/github';
+import { getInputMaybe } from 'util/input';
 
 type CommentInfo = {
   artifactIds: Array<number>;

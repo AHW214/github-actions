@@ -7,9 +7,9 @@ import { COMMENT_TAG } from 'action/shared/tag';
 import { attempt, withContext, withGithubClient } from 'control/run';
 import type { IssueComment } from 'data/comment';
 import { authorIsBot } from 'data/comment';
-import type { GithubClient } from 'data/github-client';
 import { flatten, partition } from 'util/array';
 import { numericString } from 'util/codec';
+import type { GithubClient } from 'util/github';
 
 const findPostArtifactComments = (
   comments: Array<IssueComment>,

@@ -4,7 +4,7 @@ import { Context } from 'action/get-artifact-info/context';
 import { attempt, withContext, withGithubClient } from 'control/run';
 import type { ArtifactInfo } from 'data/artifact';
 import { mkArtifactInfo } from 'data/artifact';
-import type { GithubClient } from 'data/github-client';
+import type { GithubClient } from 'util/github';
 
 type ArtifactInfoArray = Array<{
   artifact: ArtifactInfo;
