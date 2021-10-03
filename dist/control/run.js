@@ -19,10 +19,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.withGithubClient = exports.attempt = void 0;
+exports.withGithubClient = exports.withContext = exports.attempt = void 0;
 const core = __importStar(require("@actions/core"));
 const github_1 = require("@actions/github");
-const github_client_1 = require("../data/github-client");
+const context_1 = require("../data/context");
+const context_2 = require("../data/context");
+const github_2 = require("../util/github");
 const attempt = async (run) => {
     try {
         return await run();
@@ -51,4 +53,12 @@ const withGithubClient = async (run) => {
     return run(github);
 };
 exports.withGithubClient = withGithubClient;
+const withContext = async (Context, run) => (0, context_2.decodeWith)(Context, github_1.context).caseOf({
+    Left: async (err) => {
+        core.setFailed(`Failed to decode action context: ${err}`);
+        return undefined;
+    },
+    Right: run,
+});
+exports.withContext = withContext;
 //# sourceMappingURL=run.js.map

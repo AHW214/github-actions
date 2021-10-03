@@ -20,14 +20,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const github_1 = require("@actions/github");
-const codec_1 = require("./codec");
-const codec_2 = require("./codec");
+const context_1 = require("./context");
 const run_1 = require("../../control/run");
 const artifact_1 = require("../../data/artifact");
 const artifact_2 = require("../../data/artifact");
-const context_1 = require("../../data/context");
-const github_client_1 = require("../../data/github-client");
+const github_1 = require("../../util/github");
 const run = async (context, github) => {
     const { repo: { owner, repo }, payload: { workflow_run: { id: runId, check_suite_id: checkSuiteId }, }, } = context;
     const { data: { artifacts }, } = await github.rest.actions.listWorkflowRunArtifacts({
@@ -48,8 +45,5 @@ const run = async (context, github) => {
     core.setOutput('artifact-info-array', artifactInfoArray);
     core.info('Done!');
 };
-(0, run_1.attempt)(() => (0, codec_2.decode)(github_1.context).caseOf({
-    Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-    Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github)),
-}));
+(0, run_1.attempt)(async () => (0, run_1.withContext)(context_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github))));
 //# sourceMappingURL=run.js.map

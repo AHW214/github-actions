@@ -23,27 +23,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const github_1 = require("@actions/github");
 const mustache_1 = __importDefault(require("mustache"));
 const purify_ts_1 = require("purify-ts");
-const codec_1 = require("./codec");
-const codec_2 = require("./codec");
+const context_1 = require("./context");
+const tag_1 = require("../shared/tag");
 const run_1 = require("../../control/run");
 const artifact_1 = require("../../data/artifact");
+const artifact_2 = require("../../data/artifact");
 const comment_1 = require("../../data/comment");
 const comment_2 = require("../../data/comment");
-const context_1 = require("../../data/context");
-const github_client_1 = require("../../data/github-client");
-const github_client_2 = require("../../data/github-client");
-const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
+const github_1 = require("../../util/github");
+const input_1 = require("../../util/input");
 const makeCommentBody = (context, checkSuiteId, artifacts, commentHeader) => {
     const { repo: { owner, repo }, } = context;
-    const tag = `<!-- ${COMMENT_TAG} -->`;
+    const tag = `<!-- ${tag_1.COMMENT_TAG} -->`;
     const header = commentHeader.orDefault('Download your artifacts below:');
     const body = artifacts.reduce((acc, art) => {
         const name = `${art.name}.zip`;
-        const link = `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${art.id}`;
-        return `${acc}\n* [${name}](${link})`;
+        const url = (0, artifact_2.mkArtifactUrl)(owner, repo, checkSuiteId, art.id);
+        return `${acc}\n* [${name}](${url})`;
     }, '');
     return `${tag}\n${header}\n${body}`;
 };
@@ -54,7 +52,7 @@ const findOutdatedComments = async (context, github, issueNumber) => {
         owner,
         issue_number: issueNumber,
     });
-    const regexTag = new RegExp(COMMENT_TAG);
+    const regexTag = new RegExp(tag_1.COMMENT_TAG);
     const regexArtifact = new RegExp(`${owner}\/${repo}\/suites\/\\d+\/artifacts\/(\\d+)`, 'g');
     return purify_ts_1.Maybe.mapMaybe((comment) => {
         if (!(0, comment_2.authorIsBot)(comment) || !comment.body || !regexTag.test(comment.body))
@@ -79,12 +77,11 @@ const handleOutdatedArtifacts = async (context, github, newComment, outdatedComm
                 });
             }
             catch (err) {
-                // TODO
-                core.info('Probably already deleted');
+                core.warning(`Error deleting artifact: ${err}`);
             }
         }
         core.info(`Updating outdated comment ${commentId}`);
-        const tag = `<!-- ${COMMENT_TAG} -->`;
+        const tag = `<!-- ${tag_1.COMMENT_TAG} -->`;
         const body = outdatedCommentTemplate.caseOf({
             Just: (template) => mustache_1.default.render(template, { 'new-comment': newComment.html_url }),
             Nothing: () => '**These artifacts are outdated and have been deleted. ' +
@@ -130,13 +127,10 @@ const run = async (context, github, commentHeader, outdatedCommentTemplate, remo
     const newComment = await postNewComment(context, github, issueNumber, body);
     await handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
 };
-(0, run_1.attempt)(() => {
-    const commentHeader = (0, github_client_2.getInputMaybe)('comment-header');
-    const outdatedCommentTemplate = (0, github_client_2.getInputMaybe)('outdated-comment-template');
+(0, run_1.attempt)(async () => {
+    const commentHeader = (0, input_1.getInputMaybe)('comment-header');
+    const outdatedCommentTemplate = (0, input_1.getInputMaybe)('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return (0, codec_2.decode)(github_1.context).caseOf({
-        Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-        Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)),
-    });
+    return (0, run_1.withContext)(context_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)));
 });
 //# sourceMappingURL=run.js.map

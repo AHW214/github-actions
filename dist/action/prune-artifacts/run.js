@@ -20,46 +20,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const github_1 = require("@actions/github");
 const purify_ts_1 = require("purify-ts");
-const purify_ts_2 = require("purify-ts");
 const codec_1 = require("./codec");
-const codec_2 = require("./codec");
+const tag_1 = require("../shared/tag");
 const run_1 = require("../../control/run");
-const artifact_1 = require("../../data/artifact");
 const comment_1 = require("../../data/comment");
 const comment_2 = require("../../data/comment");
-const context_1 = require("../../data/context");
-const github_client_1 = require("../../data/github-client");
 const array_1 = require("../../util/array");
-const codec_3 = require("../../util/codec");
-// TODO - export from shared actions module
-const COMMENT_TAG = 'POST_ARTIFACTS_COMMENT_TAG';
-const findPostArtifactComments = (comments, removedArtifacts) => {
-    const regexTag = new RegExp(COMMENT_TAG);
+const codec_2 = require("../../util/codec");
+const github_1 = require("../../util/github");
+const findPostArtifactComments = (comments) => {
+    const regexTag = new RegExp(tag_1.COMMENT_TAG);
     const hasCommentTag = (body) => regexTag.test(body);
-    // TODO - what if only some removed
-    const includesRemovedArtifact = (body) => 
-    // TODO - meh
-    removedArtifacts.some((art) => body.includes(String(art.id)));
-    return purify_ts_1.Maybe.mapMaybe((comment) => purify_ts_1.Maybe.fromNullable(comment.body).chain((body) => (0, comment_2.authorIsBot)(comment) &&
-        hasCommentTag(body) &&
-        includesRemovedArtifact(body)
-        ? (0, purify_ts_1.Just)(comment)
-        : purify_ts_1.Nothing), comments);
+    return purify_ts_1.Maybe.mapMaybe((comment) => purify_ts_1.Maybe.fromNullable(comment.body).chain((body) => (0, comment_2.authorIsBot)(comment) && hasCommentTag(body) ? (0, purify_ts_1.Just)(comment) : purify_ts_1.Nothing), comments);
 };
-const run = async (context, github, excludeWorkflowRuns) => {
-    const { repo: { owner, repo }, payload, } = context;
-    const ref = (0, codec_1.isDeletePayload)(payload)
-        ? payload.ref
-        : payload.workflow_run.head_branch;
+const pruneArtifacts = async (github, excludeWorkflowRuns, owner, repo, ref) => {
     core.info(`Pruning artifacts generated for branch ${ref}`);
     const { data: { workflow_runs: workflowRuns }, } = await github.rest.actions.listWorkflowRunsForRepo({
         owner,
         repo,
         branch: ref,
-        // TODO - For all calls like this, have helper for repeating paginated
-        // request until no more results
         per_page: 100,
     });
     core.info(`Found ${workflowRuns.length} workflow runs for branch ${ref}`);
@@ -87,6 +67,8 @@ const run = async (context, github, excludeWorkflowRuns) => {
             artifact_id: art.id,
         });
     }
+};
+const updateArtifactComments = async (github, owner, repo, ref) => {
     const { data: pullRequests } = await github.rest.pulls.list({
         owner,
         repo,
@@ -104,10 +86,10 @@ const run = async (context, github, excludeWorkflowRuns) => {
         return comments;
     }));
     const comments = (0, array_1.flatten)(commentsNested);
-    const postArtifactComments = findPostArtifactComments(comments, artifactsToRemove);
+    const postArtifactComments = findPostArtifactComments(comments);
     for (const comment of postArtifactComments) {
         core.info(`Updating outdated artifact post comment ${comment.id}`);
-        const tag = `<!-- ${COMMENT_TAG} -->`;
+        const tag = `<!-- ${tag_1.COMMENT_TAG} -->`;
         const body = '**These artifacts have been deleted.**';
         const taggedBody = `${tag}\n${body}`;
         await github.rest.issues.updateComment({
@@ -118,16 +100,23 @@ const run = async (context, github, excludeWorkflowRuns) => {
         });
     }
 };
+const run = async (context, github, excludeWorkflowRuns) => {
+    const { repo: { owner, repo }, } = context;
+    const ref = context.eventName === 'workflow_run'
+        ? context.payload.workflow_run.head_branch
+        : context.payload.ref;
+    pruneArtifacts(github, excludeWorkflowRuns, owner, repo, ref);
+    if (context.eventName === 'delete') {
+        updateArtifactComments(github, owner, repo, ref);
+    }
+};
 (0, run_1.attempt)(() => {
     const input = core.getMultilineInput('exclude-workflow-runs');
-    (0, purify_ts_2.array)(codec_3.numericString)
+    (0, purify_ts_1.array)(codec_2.numericString)
         .decode(input)
         .caseOf({
         Left: (err) => core.setFailed(`Failed to parse input 'exclude-workflow-runs': ${err}`),
-        Right: (excludeWorkflowRuns) => (0, codec_2.decode)(github_1.context).caseOf({
-            Left: (err) => core.setFailed(`Failed to decode action context: ${err}`),
-            Right: (context) => (0, run_1.withGithubClient)((github) => run(context, github, excludeWorkflowRuns)),
-        }),
+        Right: async (excludeWorkflowRuns) => (0, run_1.withContext)(codec_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github, excludeWorkflowRuns))),
     });
 });
 //# sourceMappingURL=run.js.map

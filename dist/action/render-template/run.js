@@ -26,7 +26,7 @@ const core = __importStar(require("@actions/core"));
 const fs = __importStar(require("fs"));
 const mustache_1 = __importDefault(require("mustache"));
 const run_1 = require("../../control/run");
-const github_client_1 = require("../../data/github-client");
+const input_1 = require("../../util/input");
 const yaml_1 = require("../../data/yaml");
 const run = (templateInput, templateOutputPath, templateVariablesYaml) => (0, yaml_1.parseObject)(templateVariablesYaml).caseOf({
     Left: (err) => {
@@ -42,9 +42,9 @@ const run = (templateInput, templateOutputPath, templateVariablesYaml) => (0, ya
     },
 });
 (0, run_1.attempt)(() => {
-    const templateInput = (0, github_client_1.getInputOneOf)('template-text', 'template-path');
-    const templateOutputPath = (0, github_client_1.getInputRequired)('output-path');
-    const templateVariablesYaml = (0, github_client_1.getInputRequired)('template-variables');
+    const templateInput = (0, input_1.getInputOneOf)('template-text', 'template-path');
+    const templateOutputPath = (0, input_1.getInputRequired)('output-path');
+    const templateVariablesYaml = (0, input_1.getInputRequired)('template-variables');
     if (templateInput.type === 'None')
         return core.setFailed('Template source not specified.');
     if (templateInput.type === 'Many')

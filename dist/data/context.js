@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeWith = void 0;
-const decodeWith = (Payload) => (context) => {
-    const { repo, payload } = context;
-    return Payload.decode(payload).map((payload) => ({ repo, payload }));
+const decodeWith = (Context, context) => {
+    const { repo } = context;
+    return Context.decode(context).map((ctx) => ({ ...ctx, repo }));
 };
 exports.decodeWith = decodeWith;
 //# sourceMappingURL=context.js.map
