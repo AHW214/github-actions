@@ -1,12 +1,12 @@
 export { attempt, withContext, withGithubClient };
 
 import * as core from '@actions/core';
-import { context as globalContext, getOctokit } from '@actions/github';
+import { getOctokit, context as globalContext } from '@actions/github';
 import type { Codec } from 'purify-ts';
 
 import type { ContextOf } from 'data/context';
 import { decodeWith } from 'data/context';
-import type { GithubClient } from 'data/github-client';
+import type { GithubClient } from 'util/github';
 
 const attempt = async <T>(
   run: () => T | Promise<T>,
@@ -55,5 +55,5 @@ const withContext = <T, U>(
       return undefined;
     },
 
-    Right: (context) => run(context),
+    Right: run,
   });

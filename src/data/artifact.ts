@@ -4,7 +4,7 @@ export { mkArtifactInfo, mkArtifactUrl };
 import prettyBytes from 'pretty-bytes';
 
 import type { Awaited } from 'util/type';
-import type { GithubClient } from 'data/github-client';
+import type { GithubClient } from 'util/github';
 
 type WorkflowRunArtifact = Awaited<
   ReturnType<GithubClient['rest']['actions']['listWorkflowRunArtifacts']>

@@ -16,7 +16,7 @@ const Context = Codec.interface({
       check_suite_id: number,
       pull_requests: nonEmptyList(
         Codec.interface({
-          number: number,
+          number,
         }),
       ),
     }),

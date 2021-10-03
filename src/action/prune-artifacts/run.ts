@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
-import { Just, Maybe, Nothing } from 'purify-ts';
-import { array } from 'purify-ts';
+import { Just, Maybe, Nothing, array } from 'purify-ts';
 
 import { Context } from 'action/prune-artifacts/codec';
 import { COMMENT_TAG } from 'action/shared/tag';
