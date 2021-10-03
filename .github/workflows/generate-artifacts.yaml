@@ -2,9 +2,13 @@ name: Generate Artifacts
 
 on:
   push:
-    paths-ignore: ['test/**']
+    paths-ignore:
+      - test/**
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 jobs:
   generate-artifact-1:

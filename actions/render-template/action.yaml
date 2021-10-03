@@ -3,6 +3,10 @@ description: >
   Render a mustache template with given variables.
 author: AHW214
 inputs:
+  template-variables:
+    required: true
+    description: >
+      [YAML] Variables to include in the rendered template.
   output-name:
     required: false
     description: >
@@ -23,10 +27,6 @@ inputs:
     description: >
       [String] Text of the template to be rendered. If not given, then
       `template-path` must be specified instead.
-  template-variables:
-    required: true
-    description: >
-      [YAML] Variables to include in the rendered template.
 runs:
   using: 'node12'
   main: '../../dist/action/render-template/run.js'
