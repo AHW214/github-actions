@@ -1,6 +1,6 @@
 name: Get Artifact Info
 description: >
-  Get the information on uploaded artifacts, including download link and size.
+  Get information on uploaded artifacts, including download link and size.
 author: AHW214
 inputs:
   github-token:
@@ -22,4 +22,4 @@ outputs:
       [ { name: string, size: string, url: string } ].
 runs:
   using: 'node12'
-  main: '../dist/action/get-artifact-links/run.js'
+  main: '../dist/action/get-artifact-info/run.js'

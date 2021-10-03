@@ -9,7 +9,9 @@ import { mkArtifactInfo } from 'data/artifact';
 import type { Context } from 'data/context';
 import type { GithubClient } from 'data/github-client';
 
-type ArtifactInfoArray = Array<ArtifactInfo>;
+type ArtifactInfoArray = Array<{
+  artifact: ArtifactInfo;
+}>;
 
 type ArtifactInfoObject = {
   [name: string]: ArtifactInfo;
@@ -41,7 +43,11 @@ const run = async (
   >(
     ([infoObject, infoArray], artifact) => {
       const info = mkArtifactInfo(owner, repo, checkSuiteId, artifact);
-      return [{ ...infoObject, [info.name]: info }, [...infoArray, info]];
+
+      return [
+        { ...infoObject, [info.name]: info },
+        [...infoArray, { artifact: info }],
+      ];
     },
     [{}, []],
   );
