@@ -45,5 +45,5 @@ const run = async (context, github) => {
     core.setOutput('artifact-info-array', artifactInfoArray);
     core.info('Done!');
 };
-(0, run_1.attempt)(async () => (0, run_1.withContext)(context_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github))));
+(0, run_1.attempt)(() => (0, run_1.withContext)(context_1.Context, (context) => (0, run_1.withGithubClient)((github) => run(context, github))));
 //# sourceMappingURL=run.js.map

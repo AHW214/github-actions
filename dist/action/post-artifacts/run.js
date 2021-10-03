@@ -127,10 +127,10 @@ const run = async (context, github, commentHeader, outdatedCommentTemplate, remo
     const newComment = await postNewComment(context, github, issueNumber, body);
     await handleOutdatedArtifacts(context, github, newComment, outdatedComments, outdatedCommentTemplate);
 };
-(0, run_1.attempt)(async () => {
+(0, run_1.attempt)(() => {
     const commentHeader = (0, input_1.getInputMaybe)('comment-header');
     const outdatedCommentTemplate = (0, input_1.getInputMaybe)('outdated-comment-template');
     const removeOutdatedArtifacts = core.getBooleanInput('remove-outdated-artifacts');
-    return (0, run_1.withContext)(context_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)));
+    return (0, run_1.withContext)(context_1.Context, (context) => (0, run_1.withGithubClient)((github) => run(context, github, commentHeader, outdatedCommentTemplate, removeOutdatedArtifacts)));
 });
 //# sourceMappingURL=run.js.map

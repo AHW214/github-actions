@@ -116,7 +116,7 @@ const run = async (context, github, excludeWorkflowRuns) => {
         .decode(input)
         .caseOf({
         Left: (err) => core.setFailed(`Failed to parse input 'exclude-workflow-runs': ${err}`),
-        Right: async (excludeWorkflowRuns) => (0, run_1.withContext)(codec_1.Context, async (context) => (0, run_1.withGithubClient)(async (github) => run(context, github, excludeWorkflowRuns))),
+        Right: (excludeWorkflowRuns) => (0, run_1.withContext)(codec_1.Context, (context) => (0, run_1.withGithubClient)((github) => run(context, github, excludeWorkflowRuns))),
     });
 });
 //# sourceMappingURL=run.js.map

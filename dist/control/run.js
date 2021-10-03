@@ -53,7 +53,7 @@ const withGithubClient = async (run) => {
     return run(github);
 };
 exports.withGithubClient = withGithubClient;
-const withContext = async (Context, run) => (0, context_2.decodeWith)(Context, github_1.context).caseOf({
+const withContext = (Context, run) => (0, context_2.decodeWith)(Context, github_1.context).caseOf({
     Left: async (err) => {
         core.setFailed(`Failed to decode action context: ${err}`);
         return undefined;
