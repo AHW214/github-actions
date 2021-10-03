@@ -33,8 +33,8 @@ const makeCommentBody = (
 
   const body = artifacts.reduce((acc, art) => {
     const name = `${art.name}.zip`;
-    const link = mkArtifactUrl(owner, repo, checkSuiteId, art.id);
-    return `${acc}\n* [${name}](${link})`;
+    const url = mkArtifactUrl(owner, repo, checkSuiteId, art.id);
+    return `${acc}\n* [${name}](${url})`;
   }, '');
 
   return `${tag}\n${header}\n${body}`;
