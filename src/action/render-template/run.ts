@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import mustache from 'mustache';
 
 import { attempt } from 'control/run';
-import { getInputOneOf, getInputRequired } from 'data/github-client';
+import { getInputOneOf, getInputRequired } from 'util/input';
 import { parseObject } from 'data/yaml';
 
 type TemplateInput = { name: 'template-text' | 'template-path'; value: string };
