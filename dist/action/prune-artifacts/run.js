@@ -58,6 +58,8 @@ const run = async (context, github, excludeWorkflowRuns) => {
         owner,
         repo,
         branch: ref,
+        // TODO - For all calls like this, have helper for repeating paginated
+        // request until no more results
         per_page: 100,
     });
     core.info(`Found ${workflowRuns.length} workflow runs for branch ${ref}`);
