@@ -21,7 +21,7 @@ const mkArtifactUrl = (
   repo: string,
   checkSuiteId: number,
   artifactId: number,
-) =>
+): string =>
   `https://github.com/${owner}/${repo}/suites/${checkSuiteId}/artifacts/${artifactId}`;
 
 const mkArtifactInfo = (
