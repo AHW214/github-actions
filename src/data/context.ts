@@ -1,4 +1,5 @@
-export { Context, decodeWith };
+export type { Context };
+export { decodeWith };
 
 import type { Codec, Either } from 'purify-ts';
 import type { Context as GithubContext } from '@actions/github/lib/context';

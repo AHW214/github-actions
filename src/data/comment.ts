@@ -1,4 +1,5 @@
-export { IssueComment, authorIsBot };
+export type { IssueComment };
+export { authorIsBot };
 
 import type { Awaited } from 'util/type';
 import type { GithubClient } from 'data/github-client';
