@@ -9,6 +9,7 @@ inputs:
       [String] Token for communicating with the GitHub API.
   debug:
     required: false
+    default: false
     description: >
       [Bool] Whether to log GitHub API calls in the action output.
 outputs:
